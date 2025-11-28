@@ -11,9 +11,9 @@ function ensureLocale(input: string): Locale {
 export default async function LocaleHome({
   params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
-  const locale: Locale = ensureLocale(params.locale);
+  const locale: Locale = ensureLocale((await params).locale);
   const demos = await getAllDemos({ withContent: false, locale });
   const tHome = await getTranslations({ locale, namespace: "Home" });
   return (
