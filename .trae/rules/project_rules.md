@@ -1,136 +1,153 @@
-# Project Rules & Agent Behavior Constitution
+# 项目规则与 Agent 行为宪法
 
-## 🚨 Critical Instructions (Highest Priority)
+## 🚨 最高指令（不可违背）
 
-1. **NO LAZINESS**:
-    * **NEVER** use `// ... existing code`, `// ... implement logic here`, or similar placeholders.
-    * You MUST output the **FULL** content of the file or the **COMPLETE** code block being modified.
-    * Partial updates are strictly forbidden unless using a specialized `SearchReplace` tool that guarantees context.
+- No Laziness（零容忍懒惰）
+  - 严禁在代码块中使用 `// ... existing code`、`// ... implement logic here` 等占位符。
+  - 必须输出被修改文件或代码块的完整内容，禁止局部截断输出。
+  - 仅当使用具备上下文保障的专用检索替换工具时，才允许局部替换。
+- No Hallucination（零容忍幻觉）
+  - 严禁引入或使用 `package.json` 中不存在的库或命令。
+  - 如需新增依赖，必须先征求用户许可，并使用 `pnpm add <pkg>` 安装后再使用。
+- Language（语言）
+  - 沟通、代码注释与解释统一使用中文（除非用户另行指定）。
+  - 语气：严厉、精确、工程化，无情绪化表达。
 
-2. **NO HALLUCINATION**:
-    * **STRICTLY FORBIDDEN** to import or use libraries not listed in `package.json`.
-    * If a new library is needed, you MUST explicitly ask the user for permission to install it using `pnpm add`.
+## 🧠 思考与规划（Context → Plan → Code → Verify）
 
-3. **LANGUAGE & TONE**:
-    * All communication, comments, and explanations MUST be in **Chinese (中文)** (unless the user asks otherwise).
-    * Tone: Professional, Concise, Engineering-focused.
-
-## 🧠 Chain of Thought & Planning
-
-Before writing any code, you MUST output a plan block:
+- 在编写任何代码前，必须在对话中输出以下计划块：
 
 ```markdown
 <plan>
-- [ ] Step 1: Context Gathering (List files to read)
-- [ ] Step 2: Implementation (Atomic changes)
-- [ ] Step 3: Verification (Commands to run)
-- [ ] Step 4: Documentation Update
+- [ ] Step 1: Context Gathering（列出要读取的文件/目录）
+- [ ] Step 2: Implementation（描述原子化修改）
+- [ ] Step 3: Verification（列出将执行的校验命令）
+- [ ] Step 4: Documentation Update（说明需要更新的文档）
 </plan>
 
-**Impact Analysis**:
-- Files Modified: [List files]
-- Potential Risks: [List risks]
+**Impact Analysis（影响面分析）**：
+- Files Modified：列出将被修改的文件
+- Potential Risks：列出潜在风险与回退方案
 ```
 
-## 🛠 Tech Stack & Coding Standards
+## 🛠 技术栈与编码规范
 
-### Core Stack
+- Core Stack（核心栈）
+  - Framework：Next.js 16（App Router） `next@16.0.5`
+  - Language：TypeScript `^5`
+  - Runtime：React `19.2.0`
+  - Styling：Tailwind CSS `^4`（Utility-first），PostCSS `@tailwindcss/postcss`
+  - Lint/Format：Biome `@biomejs/biome@2.3.8`
+  - Testing：Vitest `^4.0.8`，Coverage `@vitest/coverage-v8`
 
-* **Framework**: Next.js 16 (App Router)
+- Package Manager（包管理器）
+  - `pnpm`（已存在 `pnpm-lock.yaml`）
 
-* **Language**: TypeScript ^5
-* **Styling**: Tailwind CSS v4 (Utility-first)
-* **Linting/Formatting**: Biome (`@biomejs/biome`)
-* **Testing**: Vitest
+- Script Commands（脚本命令，来自 `package.json`）
 
-### Naming Conventions
+```json
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "biome check",
+    "format": "biome format --write",
+    "prepare": "husky",
+    "typecheck": "tsc --noEmit",
+    "typecheck:fast": "tsgo --noEmit",
+    "biome:fixAll": "biome check --write .",
+    "biome:check": "biome check .",
+    "biome:ci": "biome ci .",
+    "qa": "pnpm typecheck:fast && pnpm biome:fixAll && pnpm test",
+    "qa:slow": "pnpm typecheck && pnpm biome:fixAll && pnpm test",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}
+```
 
-* **Variables/Functions**: `camelCase` (e.g., `fetchUserData`)
+- Naming Conventions（命名规范）
+  - 变量/函数：`camelCase`（如 `fetchUserData`）
+  - 组件文件：`PascalCase`（如 `UserProfile.tsx`）
+  - 路由/文件夹：`kebab-case` 或 `[slug]`（如 `my-account`、`[locale]`）
+  - 常量：`UPPER_SNAKE_CASE`（如 `MAX_RETRY_COUNT`）
 
-* **Components**: `PascalCase` (e.g., `UserProfile.tsx`)
-* **Folders (App Router)**: `kebab-case` or `[slug]` (e.g., `my-account`, `[locale]`)
-* **Constants**: `UPPER_SNAKE_CASE` (e.g., `MAX_RETRY_COUNT`)
+- Preferred Patterns（推荐模式）
+  - 函数组件：`const Component = () => {}`
+  - 复用逻辑用自定义 Hooks：`useSomething`
+  - Early Returns：优先处理边界减少嵌套
+  - Type Safety：严格类型，使用 `type`/`interface`，避免 `any`
+  - Tailwind：按工具类优先，避免内联样式；允许使用合并工具（如 `cn`）
+  - Next.js：在可行处使用 Server Components；事件逻辑放入事件处理器
 
-### Preferred Patterns
+- Anti-Patterns（禁止模式）
+  - ❌ 禁止 `any`（必须显式类型）
+  - ❌ 生产代码中禁止 `console.log`
+  - ❌ 禁止 Class 组件（错误边界除外）
+  - ❌ 禁止滥用 `useEffect`（优先 Server Components 或事件）
+  - ❌ 禁止 jQuery 或直接 DOM 操作（使用 Ref）
 
-* **Functional Components**: Use `const Component = () => {}`.
+## ⚡ 严格执行流（Development Workflow）
 
-* **Hooks**: Custom hooks for logic reuse (`useMyHook`).
-* **Early Returns**: Reduce nesting by handling edge cases first.
-* **Type Safety**: Strict TypeScript. Use interfaces/types. Avoid `any`.
-* **Tailwind**: Use `clsx` / `tailwind-merge` (or `cn` utility) for conditional classes.
+- Step 1: Context Gathering（收集上下文）
+  - 必须先列目录（如在 IDE 中运行目录列表）并读取相关文件。
+  - 严禁盲写或猜测文件路径/内容。
 
-### Anti-Patterns (Strictly Prohibited)
+- Step 2: Coding（编码）
+  - 以原子化方式进行改动，遵循命名规范与推荐模式。
 
-* ❌ **No `any`**: Explicitly define types.
+- Step 3: Self-Correction（自校验，必选）
+  - 每次改动后必须执行校验：
+    - Lint & Format：`pnpm biome:fixAll`
+    - Type Check（优先快检）：`pnpm typecheck:fast`
+    - 若快检不可用或失败，则回退：`pnpm typecheck`
+  - 若出现错误：读取错误→修复→重试（最多 3 次）。
+  - 仅当所有校验通过，方可视为任务完成。
 
-* ❌ **No `console.log`**: In production code.
-* ❌ **No Class Components**: Unless absolutely necessary for Error Boundaries.
-* ❌ **No `useEffect` abuse**: Prefer Server Components or Event Handlers where possible.
-* ❌ **No jQuery or Direct DOM manipulation**: Use Refs.
+- Step 4: Documentation（文档）
+  - 依赖变更必须同步更新 `package.json` 与 `README.md`。
+  - 环境变量变更必须更新 `.env.example`。
 
-## ⚡ Development Workflow (Strict Execution Loop)
+## 📝 文档与维护
 
-You MUST follow this loop for every coding task:
+- 依赖/脚本变更：更新 `package.json` 与 `README.md`，并在变更记录中注明。
+- 环境变量：统一管理于 `.env.example`，保持最小必要集。
+- 提交规范：遵循 Conventional Commits（`feat:`、`fix:`、`docs:`、`refactor:`、`chore:`）。
 
-### Step 1: Context Gathering
-
-* Run `ls` to explore directories.
-
-* Read related files using `Read`.
-* **DO NOT GUESS** file paths or contents.
-
-### Step 2: Coding
-
-* Implement changes atomically.
-
-* Follow the **Naming Conventions** and **Preferred Patterns**.
-
-### Step 3: Self-Correction (MANDATORY)
-
-* After ANY code change, you MUST run the verification commands:
-    1. **Lint & Format**: `pnpm biome:fixAll`
-    2. **Type Check**: `pnpm typecheck:fast`
-
-* **If errors occur**:
-  * Read the error message.
-  * Fix the code.
-  * Re-run the check (Max 3 retries).
-* **Only when checks pass** can you consider the task complete.
-
-### Step 4: Documentation
-
-* If dependencies change -> Update `package.json` & `README.md`.
-
-* If env vars change -> Update `.env.example` (if exists).
-
-## 📂 Project Structure Guide
+## 📂 项目结构指南（ASCII 树）
 
 ```text
 d:\coding\Projects\AI\ai-demos\
-├── app/                    # Next.js App Router
-│   ├── [locale]/           # i18n routes
-│   │   ├── page.tsx        # Home page
-│   │   └── demo/           # Demo details
-│   └── globals.css         # Tailwind v4 imports
-├── components/             # React Components
-│   ├── ui/                 # Shared UI components
-│   └── ...                 # Feature components
-├── lib/                    # Utilities & Logic
-│   ├── demos.ts            # Data fetching logic
-│   └── types.ts            # TypeScript definitions
-├── _demos/                 # Content Source (File System DB)
-├── messages/               # i18n strings (en.json, zh.json)
-├── public/                 # Static assets
-└── package.json
+├── src/
+│   └── app/                 # Next.js App Router 根目录
+│       ├── globals.css      # Tailwind v4 样式入口
+│       ├── layout.tsx       # 应用级布局（Server Component 优先）
+│       └── page.tsx         # 首页入口
+├── public/                  # 静态资源（SVG 等）
+├── biome.json               # Biome 配置（Lint/Format）
+├── next.config.ts           # Next.js 配置
+├── postcss.config.mjs       # PostCSS 配置
+├── tsconfig.json            # TypeScript 配置
+├── vitest.config.ts         # Vitest 测试配置
+├── .husky/                  # Husky Git Hooks（如 pre-commit）
+├── .trae/                   # Trae/Agent 规则文件
+│   └── rules/
+│       └── project_rules.md # 本文件（行为宪法）
+├── prd/                     # 产品文档与需求
+├── README.md                # 项目说明文档
+├── LICENSE                  # 许可证
+├── package.json             # 包与脚本定义
+└── pnpm-lock.yaml           # pnpm 锁文件
 ```
 
-## 📝 Commit Message Convention
+## � 严格度等级
 
-Follow Conventional Commits:
+- Strictness Level：High（任何 Lint 警告视为错误）
 
-* `feat: ...` for new features
-* `fix: ...` for bug fixes
-* `docs: ...` for documentation
-* `refactor: ...` for code restructuring
-* `chore: ...` for maintenance
+## ⚔️ 执行要求摘要
+
+- 必须遵循 Context → Plan → Code → Verify 闭环。
+- 禁止懒惰与幻觉；任何偏离将被视为错误行为。
+- 修改后立即运行：`pnpm biome:fixAll`、`pnpm typecheck:fast`（失败则 `pnpm typecheck`）、必要时 `pnpm test`，可以执行pnpm qa,一次性包含3个命令
+- 仅输出完整内容；所有说明以中文呈现；提交信息遵循约定式规范。
