@@ -37,9 +37,10 @@
   - Language：TypeScript `^5`
   - Runtime：React `19.2.0`
   - Styling：Tailwind CSS `^4`（Utility-first），PostCSS `@tailwindcss/postcss`
+  - Validation：Zod `zod@^4.1.13`
+  - UI Components：shadcn/ui（基于 Radix + Tailwind 的组件生成器与规范）
   - Lint/Format：Biome `@biomejs/biome@2.3.8`
   - Testing：Vitest `^4.0.8`，Coverage `@vitest/coverage-v8`
-  - UI: shadcn
 
 - Package Manager（包管理器）
   - `pnpm`（已存在 `pnpm-lock.yaml`）
@@ -81,6 +82,9 @@
   - Type Safety：严格类型，使用 `type`/`interface`，避免 `any`
   - Tailwind：按工具类优先，避免内联样式；允许使用合并工具（如 `cn`）
   - Next.js：在可行处使用 Server Components；事件逻辑放入事件处理器
+  - Schema Validation：优先使用 `zod` 进行模式定义与数据校验
+  - Forms（如已集成）：建议 `react-hook-form` + `zod` 结合进行表单校验
+  - UI 组件规范：遵循 `shadcn/ui` 组件风格与约定，优先封装于 `src/components/ui`
 
 - Anti-Patterns（禁止模式）
   - ❌ 禁止 `any`（必须显式类型）
