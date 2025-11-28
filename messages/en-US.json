@@ -10,6 +10,10 @@
     "title": "Demo List"
   },
   "Demo": {
-    "backToList": "Back to List"
+    "backToList": "Back to List",
+    "fullscreen": {
+      "enter": "Fullscreen",
+      "exit": "Exit fullscreen"
+    }
   }
 }

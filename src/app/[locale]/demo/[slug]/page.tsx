@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import HtmlPreview from "@/components/HtmlPreview";
+import PreviewSection from "@/components/PreviewSection";
 import PromptDisplay from "@/components/PromptDisplay";
-import ReactPreview from "@/components/ReactPreview";
 import { getAllDemos, getDemoBySlug } from "@/lib/demos";
 import type { Locale } from "@/lib/types";
 
@@ -56,11 +55,12 @@ export default async function DemoDetail({ params }: { params: unknown }) {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          {isHtml ? (
-            <HtmlPreview html={demo.code} title={titleText} height={480} />
-          ) : (
-            <ReactPreview code={demo.code} title={titleText} height={480} />
-          )}
+          <PreviewSection
+            kind={isHtml ? "html" : "react"}
+            code={demo.code}
+            title={titleText}
+            height={720}
+          />
         </div>
         <div>
           <PromptDisplay ai={demo.ai} prompt={demo.prompt} />

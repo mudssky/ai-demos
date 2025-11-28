@@ -1,5 +1,6 @@
 "use client";
-import type { FC } from "react";
+import type { FC, ForwardedRef } from "react";
+import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
 export interface HtmlPreviewProps {
@@ -9,26 +10,32 @@ export interface HtmlPreviewProps {
   title?: string;
 }
 
-const HtmlPreview: FC<HtmlPreviewProps> = ({
-  html,
-  className,
-  height,
-  title,
-}) => {
-  const iframeHeight =
-    typeof height === "number" ? `${height}px` : (height ?? "400px");
+const HtmlPreview = forwardRef(function HtmlPreview(
+  { html, className, height, title }: HtmlPreviewProps,
+  ref: ForwardedRef<HTMLDivElement>,
+) {
+  const containerHeight =
+    typeof height === "number" ? `${height}px` : (height ?? undefined);
   return (
-    <div className={cn("w-full border rounded-md overflow-hidden", className)}>
+    <div
+      ref={ref}
+      className={cn(
+        "w-full border rounded-md overflow-hidden relative bg-white",
+        className,
+      )}
+      style={{ height: containerHeight ?? "100%" }}
+    >
       <iframe
         title={title ?? "HTML Preview"}
         srcDoc={html}
-        className="w-full"
-        style={{ height: iframeHeight }}
+        className="w-full h-full"
         sandbox="allow-scripts allow-same-origin allow-forms allow-modals"
         referrerPolicy="no-referrer"
+        allow="fullscreen"
+        allowFullScreen
       />
     </div>
   );
-};
+});
 
 export default HtmlPreview;
