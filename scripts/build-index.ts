@@ -1,5 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import type { DemoMeta } from "@/lib/types";
 
 type LocalizedText =
   | string
@@ -60,11 +61,11 @@ async function listDemoDirs(): Promise<string[]> {
 }
 
 async function readDemo(dirPath: string): Promise<{
-  meta: any;
+  meta: DemoMeta;
   code: string;
   entry: "/index.html" | "/App.tsx";
 }> {
-  const meta = await readJSON<any>(path.join(dirPath, "meta.json"));
+  const meta = await readJSON<DemoMeta>(path.join(dirPath, "meta.json"));
   const htmlPath = path.join(dirPath, "index.html");
   const tsxPath = path.join(dirPath, "App.tsx");
   const hasHtml = await pathExists(htmlPath);
