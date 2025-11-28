@@ -39,6 +39,7 @@
   - Styling：Tailwind CSS `^4`（Utility-first），PostCSS `@tailwindcss/postcss`
   - Lint/Format：Biome `@biomejs/biome@2.3.8`
   - Testing：Vitest `^4.0.8`，Coverage `@vitest/coverage-v8`
+  - UI: shadcn
 
 - Package Manager（包管理器）
   - `pnpm`（已存在 `pnpm-lock.yaml`）
