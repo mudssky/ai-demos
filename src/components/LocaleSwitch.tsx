@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { FC } from "react";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   currentLocale: "en-US" | "zh-CN";
@@ -23,9 +24,11 @@ const LocaleSwitch: FC<Props> = ({ currentLocale }) => {
   })();
 
   return (
-    <Link href={href} className="text-sm rounded border px-2 py-1">
-      {label}
-    </Link>
+    <Button asChild variant="outline" size="sm">
+      <Link href={href} aria-label={label} title={label}>
+        {label}
+      </Link>
+    </Button>
   );
 };
 
