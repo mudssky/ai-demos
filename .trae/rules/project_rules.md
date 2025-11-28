@@ -154,5 +154,5 @@ d:\coding\Projects\AI\ai-demos\
 
 - 必须遵循 Context → Plan → Code → Verify 闭环。
 - 禁止懒惰与幻觉；任何偏离将被视为错误行为。
-- 修改后立即运行：`pnpm biome:fixAll`、`pnpm typecheck:fast`（失败则 `pnpm typecheck`）、必要时 `pnpm test`，可以执行pnpm qa,一次性包含3个命令
+- 修改后立即运行：`pnpm biome:fixAll`、`pnpm typecheck:fast`（失败则 `pnpm typecheck`）、必要时 `pnpm test`，可以执行pnpm qa,一次性包含以上3个命令
 - 仅输出完整内容；所有说明以中文呈现；提交信息遵循约定式规范。
