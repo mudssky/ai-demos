@@ -8,7 +8,16 @@
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
-    "prepare": "husky"
+    "prepare": "husky",
+    "typecheck": "tsc --noEmit",
+    "typecheck:fast": "tsgo --noEmit",
+    "biome:fixAll": "biome check --write .",
+    "biome:check": "biome check .",
+    "biome:ci": "biome ci .",
+    "qa": "pnpm typecheck:fast && pnpm biome:fixAll && pnpm test",
+    "qa:slow": "pnpm typecheck && pnpm biome:fixAll && pnpm test",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "next": "16.0.5",
@@ -26,6 +35,8 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "@vitest/coverage-v8": "^4.0.8",
+    "vitest": "^4.0.8"
   }
 }
