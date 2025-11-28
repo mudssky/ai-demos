@@ -7,8 +7,8 @@ import {
 } from "@/lib/demos";
 
 describe("demos data layer", () => {
-  it("reads all demos summary (en)", async () => {
-    const list = await getAllDemos({ withContent: false, locale: "en" });
+  it("reads all demos summary (en-US)", async () => {
+    const list = await getAllDemos({ locale: "en-US" });
     const slugs = list.map((d) => d.slug);
     expect(slugs).toContain("hello-html");
     expect(slugs).toContain("hello-react");
@@ -22,8 +22,8 @@ describe("demos data layer", () => {
     expect(react.title).toBe("Hello React");
   });
 
-  it("localizes to zh with fallback", async () => {
-    const list = await getAllDemos({ withContent: false, locale: "zh" });
+  it("localizes to zh-CN with fallback", async () => {
+    const list = await getAllDemos({ locale: "zh-CN" });
     const html = list.find((d) => d.slug === "hello-html");
     expect(html).toBeDefined();
     if (!html) throw new Error("missing hello-html");
@@ -36,16 +36,16 @@ describe("demos data layer", () => {
   });
 
   it("gets demo by slug with content and entry", async () => {
-    const html = await getDemoBySlug("hello-html", "en");
+    const html = await getDemoBySlug("hello-html", "en-US");
     expect(html.entry).toBe("/index.html");
     expect(html.code).toMatch("<!doctype html>");
-    const react = await getDemoBySlug("hello-react", "en");
+    const react = await getDemoBySlug("hello-react", "en-US");
     expect(react.entry).toBe("/App.tsx");
     expect(react.code).toMatch("export default function App");
   });
 
   it("filters by type and model", async () => {
-    const list = await getAllDemos({ withContent: false, locale: "en" });
+    const list = await getAllDemos({ locale: "en-US" });
     const htmlOnly = filterDemos(list, { type: "html" });
     expect(htmlOnly.length).toBe(1);
     expect(htmlOnly[0].slug).toBe("hello-html");
@@ -55,7 +55,7 @@ describe("demos data layer", () => {
   });
 
   it("query filters across fields", async () => {
-    const list = await getAllDemos({ withContent: false, locale: "en" });
+    const list = await getAllDemos({ locale: "en-US" });
     const q1 = filterDemos(list, { query: "tsx" });
     expect(q1.map((d) => d.slug)).toEqual(["hello-react"]);
     const q2 = filterDemos(list, { query: "basic" });
@@ -63,7 +63,7 @@ describe("demos data layer", () => {
   });
 
   it("builds search index including snippet", async () => {
-    const list = await getAllDemos({ withContent: true, locale: "en" });
+    const list = await getAllDemos({ withContent: true, locale: "en-US" });
     const index = buildSearchIndex(list, "1");
     expect(index.version).toBe("1");
     expect(index.entries.length).toBeGreaterThanOrEqual(2);

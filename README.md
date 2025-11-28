@@ -64,11 +64,11 @@ tests/
 
 ## 国际化（next-intl）
 
-- 路由结构：`src/app/[locale]/`，支持 `en` 与 `zh` 两个语言前缀。
-- 消息文件：`messages/{locale}.json`，如：`messages/en.json`、`messages/zh.json`。
+- 路由结构：`src/app/[locale]/`，支持 `en-US` 与 `zh-CN` 两个语言前缀。
+- 消息文件：`messages/{locale}.json`，如：`messages/en-US.json`、`messages/zh-CN.json`。
 - Provider 集成：`src/app/[locale]/layout.tsx` 动态加载对应 `messages` 并包裹 `NextIntlClientProvider`。
-- 中间件：`src/middleware.ts` 使用 `next-intl` 中间件强制语言前缀与默认语言 `en`。
-- 根路由：`src/app/page.tsx` 重定向至 `/en`，统一入口到带语言前缀的页面。
+- 中间件：`src/middleware.ts` 使用 `next-intl` 中间件（参见 `next-intl.config.ts`）强制语言前缀与默认语言 `en-US`。
+- 根路由：`src/app/page.tsx` 重定向至 `/en-US`，统一入口到带语言前缀的页面。
 - 服务器组件翻译：
 
   ```ts

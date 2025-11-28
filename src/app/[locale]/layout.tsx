@@ -2,10 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
+import LocaleSwitch from "@/components/LocaleSwitch";
 import { cn } from "@/lib/utils";
 
-export function generateStaticParams(): Array<{ locale: "en" | "zh" }> {
-  return [{ locale: "en" }, { locale: "zh" }];
+export function generateStaticParams(): Array<{ locale: "en-US" | "zh-CN" }> {
+  return [{ locale: "en-US" }, { locale: "zh-CN" }];
 }
 
 export default async function LocaleLayout({
@@ -21,7 +22,7 @@ export default async function LocaleLayout({
   } else {
     resolvedParams = params as { locale: string };
   }
-  const locale = resolvedParams?.locale === "zh" ? "zh" : "en";
+  const locale = resolvedParams?.locale === "zh-CN" ? "zh-CN" : "en-US";
   let messages: Record<string, unknown>;
   try {
     messages = (await import(`../../../messages/${locale}.json`)).default;
@@ -34,10 +35,12 @@ export default async function LocaleLayout({
       <NextIntlClientProvider locale={locale} messages={messages}>
         <header className="border-b">
           <div className="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between">
-            <Link href="/en" className="font-semibold">
+            <Link href="/en-US" className="font-semibold">
               AI Demos
             </Link>
-            <nav className="text-sm"></nav>
+            <nav className="text-sm">
+              <LocaleSwitch currentLocale={locale} />
+            </nav>
           </div>
         </header>
         <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>

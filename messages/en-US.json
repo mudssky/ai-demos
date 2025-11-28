@@ -8,5 +8,8 @@
   },
   "Home": {
     "title": "Demo List"
+  },
+  "Demo": {
+    "backToList": "Back to List"
   }
 }

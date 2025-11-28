@@ -13,10 +13,12 @@ export interface SearchBarProps {
 
 const SearchBar: FC<SearchBarProps> = ({ items, locale, className }) => {
   const { query, setQuery, open, setOpen, results, total } = useSearch(items);
-  const placeholder =
-    locale === "zh" ? "搜索示例、标签、模型" : "Search demos, tags, models";
-  const labelStats = locale === "zh" ? "结果" : "results";
-  const labelEmpty = locale === "zh" ? "无匹配" : "No matches";
+  const isZh = locale === "zh-CN";
+  const placeholder = isZh
+    ? "搜索示例、标签、模型"
+    : "Search demos, tags, models";
+  const labelStats = isZh ? "结果" : "results";
+  const labelEmpty = isZh ? "无匹配" : "No matches";
   return (
     <div className={cn("relative", className)}>
       <input

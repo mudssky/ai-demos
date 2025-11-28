@@ -20,9 +20,9 @@ function resolveDemoRoot(): string {
   return path.join(process.cwd(), DEMOS_DIR);
 }
 
-function asString(text: LocalizedText, locale: Locale = "en"): string {
+function asString(text: LocalizedText, locale: Locale = "en-US"): string {
   if (typeof text === "string") return text;
-  return locale === "zh" ? (text.zh ?? text.en) : text.en;
+  return locale === "zh-CN" ? (text.zh ?? text.en) : text.en;
 }
 
 async function readJSON<T>(filePath: string): Promise<T> {
@@ -65,7 +65,7 @@ async function listDemoDirs(): Promise<string[]> {
     .map((e) => path.join(root, e.name));
 }
 
-function toSummary(meta: DemoMeta, locale: Locale = "en"): DemoSummary {
+function toSummary(meta: DemoMeta, locale: Locale = "en-US"): DemoSummary {
   return {
     slug: meta.slug,
     title: asString(meta.title, locale),
@@ -81,7 +81,7 @@ function toSummary(meta: DemoMeta, locale: Locale = "en"): DemoSummary {
 
 export async function getDemoBySlug(
   slug: string,
-  locale: Locale = "en",
+  locale: Locale = "en-US",
 ): Promise<Demo> {
   const dirs = await listDemoDirs();
   for (const dir of dirs) {
@@ -112,7 +112,7 @@ export async function getAllDemos(
 export async function getAllDemos(
   options?: GetAllDemosOptions,
 ): Promise<Array<Demo | DemoSummary>> {
-  const locale = options?.locale ?? "en";
+  const locale = options?.locale ?? "en-US";
   const withContent = options?.withContent === true;
   const dirs = await listDemoDirs();
   const items: Array<Demo | DemoSummary> = [];

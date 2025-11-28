@@ -8,5 +8,8 @@
   },
   "Home": {
     "title": "示例列表"
+  },
+  "Demo": {
+    "backToList": "返回列表"
   }
 }
