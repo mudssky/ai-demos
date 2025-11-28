@@ -1,0 +1,17 @@
+{
+  "id": "demo-hello-html",
+  "slug": "hello-html",
+  "title": { "en": "Hello HTML", "zh": "HTML 入门示例" },
+  "description": { "en": "Simple HTML preview demo" },
+  "type": "html",
+  "ai": {
+    "model": "gpt-4o",
+    "agent": "cursor",
+    "provider": "openai",
+    "temperature": 0.2
+  },
+  "prompt": { "main": "Create a simple HTML page" },
+  "tags": ["html", "basic"],
+  "createdAt": "2025-11-28T00:00:00.000Z",
+  "version": "1.0.0"
+}
