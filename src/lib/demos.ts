@@ -194,7 +194,8 @@ export function buildSearchIndex(
       tags: item.tags,
       type: item.type,
       ai: { model: item.ai.model, agent: item.ai.agent },
-    } satisfies Omit<SearchIndexEntry, "contentSnippet" | "updatedAt">;
+      updatedAt: item.createdAt,
+    } satisfies Omit<SearchIndexEntry, "contentSnippet">;
     const contentSnippet = "code" in item ? item.code.slice(0, 240) : undefined;
     return { ...base, contentSnippet };
   });

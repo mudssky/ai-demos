@@ -17,7 +17,8 @@
     "qa": "pnpm typecheck:fast && pnpm biome:fixAll && pnpm test",
     "qa:slow": "pnpm typecheck && pnpm biome:fixAll && pnpm test",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prebuild": "node scripts/build-index.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dropdown-menu": "^2.1.16",
