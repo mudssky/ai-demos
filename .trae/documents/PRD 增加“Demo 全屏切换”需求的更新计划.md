@@ -1,0 +1,56 @@
+## 🧭 Plan
+- [ ] Goals：在 PRD 中增加“全屏切换”需求并明确 UI 采用 `lucide-react` 图标；完善 RTM、变更记录与任务拆解，为后续实现提供清晰依据
+- [ ] Steps：
+  - [ ] Step 1: Context Gathering（确认现状与约束）
+    - [ ] 已读取：`prd/需求说明书.md`、`prd/需求跟踪矩阵.md`、`prd/需求变更记录.md`、`prd/docs/开发任务拆解.md`、`prd/init/初始需求.md`、`prd/init/i18n.md`
+    - [ ] 约束：
+      - i18n 必须覆盖中英；静态导出；HTML 预览在 iframe 沙箱中；React 预览基于 Sandpack。
+      - 新增依赖需经确认后安装（此处用户要求使用 `lucide-react`，将在实施阶段进行 `pnpm add lucide-react`）。
+  - [ ] Step 2: Implementation（PRD 文档更新）
+    - [ ] 《需求说明书》新增模块 L：全屏切换（FullScreen Toggle）
+      - 描述：为详情页预览区域提供“进入/退出全屏”控件，统一 HTML 与 React 两类 Demo 的交互与样式；按钮图标使用 `lucide-react`。
+      - 需求：
+        - UI 图标：
+          - 使用 `lucide-react` 的 `Maximize`（进入全屏）与 `Minimize`（退出全屏）图标；大小 `16~20px`；颜色随主题（shadcn/ui 基线）。
+          - 按钮具备可访问性属性（`aria-pressed`/焦点可见），支持 Tooltip 文案。
+        - HTML 预览：外层容器触发 Fullscreen API，iframe 设置 `allowfullscreen`/`allow="fullscreen"`；保持沙箱安全（不在内嵌文档调用）。
+        - React 预览：Sandpack 外层容器进入全屏；进入时收敛非必要 UI，退出恢复。
+        - 状态管理：监听 `fullscreenchange`；文案与图标状态联动。
+        - 键盘与手势：`Esc` 退出；移动端遮罩点击退出；避免与 Sandpack/iframe 手势冲突。
+        - i18n：新增键 `DemoPage.fullscreen.enter`、`DemoPage.fullscreen.exit`。
+      - 验收：全屏切换稳定；状态保持；桌面与移动一致；现代浏览器覆盖。
+      - 优先级：P0；难度：低-中。
+    - [ ] 《需求跟踪矩阵》新增：
+      - REQ-038 | 详情页-全屏控件 | `lucide-react` 图标按钮与状态管理 | P0 | 低 | 新增需求 | 引用模块 L
+      - REQ-039 | HTML 预览-全屏 | 容器级 Fullscreen API + iframe 兼容 | P0 | 中 | 新增需求 | 引用模块 L
+      - REQ-040 | React 预览-全屏 | Sandpack 容器全屏与 UI 收敛 | P0 | 中 | 新增需求 | 引用模块 L
+      - REQ-041 | i18n-全屏文案 | 新增/维护全屏文案键 | P0 | 低 | 新增需求 | 引用模块 L
+      - REQ-042 | 图标依赖 | 引入并统一使用 `lucide-react` | P0 | 低 | 新增需求 | 引用模块 L
+    - [ ] 《需求变更记录》新增：
+      - v0.1.3 | 2025-11-29 | 新增 | 增加全屏切换需求并明确使用 `lucide-react` 图标 | 提升可用性与一致性 | 详情页/预览组件/i18n/依赖 | REQ-038~042
+    - [ ] 《开发任务拆解》新增/调整 Task：
+      - Batch 1：通用组件
+        - Task：在 `HtmlPreview`/`ReactPreview` 增加外层容器 `ref` 或 `containerId`，支持统一全屏调用；AC：容器进入/退出稳定。
+      - Batch 3：页面与路由
+        - Task：实现 `FullScreenToggle`（按钮组件，使用 `lucide-react` `Maximize/Minimize`）；绑定容器与 `fullscreenchange`；AC：桌面/移动均通过。
+      - Batch 4：i18n
+        - Task：新增文案键 `DemoPage.fullscreen.enter/exit`；AC：中英覆盖与默认回退。
+      - Batch X：依赖管理
+        - Task：安装并集成 `lucide-react`；AC：按钮图标渲染正确；与 shadcn/ui 风格一致。
+  - [ ] Step 3: Verification（实施阶段）
+    - [ ] 代码验证：执行 `pnpm qa`（`typecheck:fast`→回退、`biome:fixAll`、`vitest`）。
+    - [ ] 手工验收：桌面与移动全屏交互；`Esc` 与遮罩退出；状态保持。
+  - [ ] Step 4: Documentation Update（同步与可视化）
+    - [ ] 更新截图/示意（可选）：详情页右上角全屏按钮与进入状态效果图。
+
+**Impact Analysis（影响面分析）**：
+- Files Modified：
+  - `prd/需求说明书.md`（新增模块 L，明确 `lucide-react` 图标要求）
+  - `prd/需求跟踪矩阵.md`（新增 REQ-038~042）
+  - `prd/需求变更记录.md`（新增 v0.1.3）
+  - `prd/docs/开发任务拆解.md`（新增 Task/依赖项）
+  - 后续实施阶段：`package.json`（新增依赖 `lucide-react`）、`messages/{locale}.json`（新增文案键）
+- Potential Risks：
+  - `lucide-react` 版本兼容与 tree-shaking；需按需引入图标组件。
+  - Fullscreen API 与 iframe/sandbox 的跨浏览器差异；采用外层容器触发与 `allowfullscreen`/`allow="fullscreen"` 兼容策略。
+  - Sandpack 全屏布局与主题高度参数互动；提供样式降级。
