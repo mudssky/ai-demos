@@ -1,9 +1,16 @@
 "use client";
+import { Languages } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { FC } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type Props = {
   currentLocale: "en-US" | "zh-CN";
@@ -12,23 +19,48 @@ type Props = {
 const LocaleSwitch: FC<Props> = ({ currentLocale }) => {
   const t = useTranslations("Common.locale");
   const pathname = usePathname();
-  const target = currentLocale === "zh-CN" ? "en-US" : "zh-CN";
-  const label = currentLocale === "zh-CN" ? t("switchToEN") : t("switchToZH");
 
-  // Replace the first segment (locale) while preserving the rest of the path
-  const href = (() => {
+  const buildHref = (target: "en-US" | "zh-CN") => {
     const segments = pathname.split("/").filter(Boolean);
     if (segments.length === 0) return `/${target}`;
     segments[0] = target;
     return `/${segments.join("/")}`;
-  })();
+  };
+
+  const hrefEN = buildHref("en-US");
+  const hrefZH = buildHref("zh-CN");
+
+  const labelEN = t("switchToEN");
+  const labelZH = t("switchToZH");
+
+  const currentLabel = currentLocale === "en-US" ? "EN" : "中文";
+  const currentTitle = currentLocale === "en-US" ? labelZH : labelEN;
 
   return (
-    <Button asChild variant="outline" size="sm">
-      <Link href={href} aria-label={label} title={label}>
-        {label}
-      </Link>
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          aria-label="Language"
+          title={currentTitle}
+        >
+          <Languages className="mr-1" /> {currentLabel}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem disabled={currentLocale === "en-US"} asChild>
+          <Link href={hrefEN} aria-label={labelEN} title={labelEN}>
+            EN
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem disabled={currentLocale === "zh-CN"} asChild>
+          <Link href={hrefZH} aria-label={labelZH} title={labelZH}>
+            中文
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
