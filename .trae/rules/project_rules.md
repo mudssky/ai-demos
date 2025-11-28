@@ -18,13 +18,13 @@
 - 在编写任何代码前，必须在对话中输出以下计划块：
 
 ```markdown
-<plan>
-- [ ] Step 1: Context Gathering（列出要读取的文件/目录）
-- [ ] Step 2: Implementation（描述原子化修改）
-- [ ] Step 3: Verification（列出将执行的校验命令）
-- [ ] Step 4: Documentation Update（说明需要更新的文档）
-</plan>
-
+## 🧭 Plan
+- [ ] Goals：清晰描述要达成的结果
+- [ ] Steps：
+  - [ ] Step 1: Context Gathering（列出要读取的文件/目录）
+  - [ ] Step 2: Implementation（描述原子化修改）
+  - [ ] Step 3: Verification（列出将执行的校验命令）
+  - [ ] Step 4: Documentation Update（说明需要更新的文档）
 **Impact Analysis（影响面分析）**：
 - Files Modified：列出将被修改的文件
 - Potential Risks：列出潜在风险与回退方案
