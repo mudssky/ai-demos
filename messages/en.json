@@ -1,0 +1,12 @@
+{
+  "Common": {
+    "brand": "AI Demos",
+    "locale": {
+      "switchToEN": "Switch to EN",
+      "switchToZH": "Switch to Chinese"
+    }
+  },
+  "Home": {
+    "title": "Demo List"
+  }
+}

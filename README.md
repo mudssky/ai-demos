@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Demos（Next.js 16 + React 19）
 
-## Getting Started
+本项目基于 Next.js 16（App Router）与 React 19，已集成 Tailwind v4、Vitest、Biome，并新增 Zod 与 shadcn/ui 技术栈。
 
-First, run the development server:
+## 快速开始
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- 安装依赖：`pnpm install`
+- 本地开发：`pnpm dev`，访问 `http://localhost:3000`
+- 质量校验：`pnpm qa`（类型检查 + 格式修复 + 测试）
+
+## 技术栈
+
+- 应用框架：`next@16.0.5`
+- 运行时：`react@19.2.0`、`react-dom@19.2.0`
+- 样式：`tailwindcss@^4`、`@tailwindcss/postcss@^4`
+- 代码质量：`@biomejs/biome@2.3.8`
+- 测试：`vitest@^4.0.8`、覆盖率：`@vitest/coverage-v8`
+- UI 组件：`shadcn/ui`（通过生成组件，已配置 `components.json`）
+  - 依赖：`class-variance-authority`、`tailwind-merge`、`@radix-ui/react-slot`、`lucide-react`
+- 校验与类型安全：`zod@^4`
+
+## 已集成内容
+
+- 基础 UI 组件：`Button`、`Input`、`Label`（路径：`src/components/ui/*`）
+- Zod 表单校验示例：`/demo/zod-form`
+  - 文件：`src/app/demo/zod-form/page.tsx`
+  - 功能：姓名与邮箱校验、错误提示、成功信息展示
+- 单元测试：`tests/zod.test.ts`
+
+## 目录结构
+
+```
+src/
+  app/
+    globals.css
+    page.tsx
+    demo/
+      zod-form/
+        page.tsx
+  components/
+    ui/
+      button.tsx
+      input.tsx
+      label.tsx
+  lib/
+    utils.ts
+tests/
+  zod.test.ts
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 开发命令
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `pnpm dev` 启动开发服务器
+- `pnpm build` 构建生产包
+- `pnpm start` 运行生产服务
+- `pnpm qa` 一体化质量检查（类型 + 格式 + 测试）
+- `pnpm test` 运行单元测试
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 注意事项
 
-## Learn More
+- Tailwind v4 已在 `src/app/globals.css` 通过 `@import "tailwindcss"` 引入，主题变量通过 `@theme inline` 与 CSS 变量维护。
+- shadcn/ui 组件生成配置位于 `components.json`，组件放置于 `src/components/ui`。
+- 避免在生产代码中使用 `console.log`，统一使用类型安全与早返回策略。
 
-To learn more about Next.js, take a look at the following resources:
+## 国际化（next-intl）
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- 路由结构：`src/app/[locale]/`，支持 `en` 与 `zh` 两个语言前缀。
+- 消息文件：`messages/{locale}.json`，如：`messages/en.json`、`messages/zh.json`。
+- Provider 集成：`src/app/[locale]/layout.tsx` 动态加载对应 `messages` 并包裹 `NextIntlClientProvider`。
+- 中间件：`src/middleware.ts` 使用 `next-intl` 中间件强制语言前缀与默认语言 `en`。
+- 根路由：`src/app/page.tsx` 重定向至 `/en`，统一入口到带语言前缀的页面。
+- 服务器组件翻译：
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+  ```ts
+  import {getTranslations} from "next-intl/server";
+  const t = await getTranslations({locale: "en", namespace: "Home"});
+  t("title");
+  ```
 
-## Deploy on Vercel
+- 客户端组件翻译：
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+  ```tsx
+  "use client";
+  import {useTranslations} from "next-intl";
+  const t = useTranslations("Home");
+  t("title");
+  ```

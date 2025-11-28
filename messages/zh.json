@@ -1,0 +1,12 @@
+{
+  "Common": {
+    "brand": "AI Demos",
+    "locale": {
+      "switchToEN": "切换到英文",
+      "switchToZH": "切换到中文"
+    }
+  },
+  "Home": {
+    "title": "示例列表"
+  }
+}
