@@ -42,6 +42,7 @@
   - Variants/Utilities：class-variance-authority（CVA）、tailwind-merge、clsx（组件变体与类名合并）
   - Lint/Format：Biome `@biomejs/biome@2.3.8`
   - Testing：Vitest `^4.0.8`，Coverage `@vitest/coverage-v8`
+  - Playground/Preview：`@codesandbox/sandpack-react`（React 组件在线预览）
 
 - Package Manager（包管理器）
   - `pnpm`（已存在 `pnpm-lock.yaml`）
@@ -87,6 +88,15 @@
   - Forms（如已集成）：建议 `react-hook-form` + `zod` 结合进行表单校验
   - UI 组件规范：遵循 `shadcn/ui` 组件风格与约定，优先封装于 `src/components/ui`
   - CVA 变体规范：使用 `cva` 定义组件 `variant`/`size` 等变体与默认值；对外暴露同名 props；类名合并使用 `tailwind-merge`；共享工具函数位于 `src/lib/utils.ts`（`cn`）；组件目录位于 `src/components/ui/*`
+  - React 组件在线预览：使用 `@codesandbox/sandpack-react`（仅客户端组件，`template: react-ts`；通过 `files` 注入 `"/App.tsx"`；避免 SSR 引入）
+
+### Sandpack 使用规范
+
+- 安装：`pnpm add @codesandbox/sandpack-react`（可选主题：`@codesandbox/sandpack-themes`）
+- 客户端限定：预览组件文件需加 `"use client"`，避免在 Server Components 中直接引入。
+- 模板与入口：`template: "react-ts"`，通过 `files` 注入 `"/App.tsx"` 内容。
+- 代码约束：传入的 `code` 必须默认导出 `App` 组件（`export default function App(){...}`）。
+- 性能建议：Sandpack 首次加载体积与编译时间较大，建议对预览组件进行懒加载，并按需控制 `height`。
 
 - Anti-Patterns（禁止模式）
   - ❌ 禁止 `any`（必须显式类型）
