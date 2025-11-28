@@ -39,6 +39,7 @@
   - Styling：Tailwind CSS `^4`（Utility-first），PostCSS `@tailwindcss/postcss`
   - Validation：Zod `zod@^4.1.13`
   - UI Components：shadcn/ui（基于 Radix + Tailwind 的组件生成器与规范）
+  - Variants/Utilities：class-variance-authority（CVA）、tailwind-merge、clsx（组件变体与类名合并）
   - Lint/Format：Biome `@biomejs/biome@2.3.8`
   - Testing：Vitest `^4.0.8`，Coverage `@vitest/coverage-v8`
 
@@ -85,6 +86,7 @@
   - Schema Validation：优先使用 `zod` 进行模式定义与数据校验
   - Forms（如已集成）：建议 `react-hook-form` + `zod` 结合进行表单校验
   - UI 组件规范：遵循 `shadcn/ui` 组件风格与约定，优先封装于 `src/components/ui`
+  - CVA 变体规范：使用 `cva` 定义组件 `variant`/`size` 等变体与默认值；对外暴露同名 props；类名合并使用 `tailwind-merge`；共享工具函数位于 `src/lib/utils.ts`（`cn`）；组件目录位于 `src/components/ui/*`
 
 - Anti-Patterns（禁止模式）
   - ❌ 禁止 `any`（必须显式类型）
