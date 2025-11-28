@@ -1,0 +1,37 @@
+## 🧭 Plan
+- [ ] Goals：将 `ReactPreview.tsx` 由自建 iframe+Babel 方案改为 `@codesandbox/sandpack-react`，保持现有 props 使用体验；同步在项目规则与技术栈文档中新增 Sandpack 集成说明。
+- [ ] Steps：
+  - [ ] Step 1: Context Gathering（列出要读取的文件/目录）
+    - `src/components/ReactPreview.tsx`
+    - `package.json`（确认未安装 `@codesandbox/sandpack-react`）
+    - `prd/docs/technical-stack.md`、`.trae/rules/project_rules.md`（了解文档结构与更新位置）
+  - [ ] Step 2: Implementation（描述原子化修改）
+    - 在 `package.json` 安装运行时依赖：`@codesandbox/sandpack-react`（如需主题可选 `@codesandbox/sandpack-themes`）。
+    - 重写 `src/components/ReactPreview.tsx`：
+      - 继续使用 `"use client"`；保留 `ReactPreviewProps`（`code`、`className`、`height`、`title`）。
+      - 使用 `SandpackProvider template="react-ts"`，通过 `files={{"/App.tsx": code}}` 注入用户代码。
+      - 使用 `SandpackLayout + SandpackPreview` 渲染预览；容器样式与高度沿用原组件（`className`、`height`）。
+      - 取消 CDN `react/react-dom/@babel` 与 `iframe srcDoc` 生成逻辑，移除 `sandbox` 与 `referrerPolicy`。
+    - 保持组件 API 尽量稳定：不引入 breaking changes（调用方只需传 `code` 即可预览）。
+  - [ ] Step 3: Verification（列出将执行的校验命令）
+    - `pnpm add @codesandbox/sandpack-react`（如采用主题：再加 `@codesandbox/sandpack-themes`）。
+    - `pnpm qa`（含 `typecheck:fast`、`biome:fixAll`、`vitest run`）。
+    - 本地运行 `pnpm dev`，在示例页面注入测试代码片段（定义默认导出 `App` 组件）验证渲染与高度控制。
+  - [ ] Step 4: Documentation Update（说明需要更新的文档）
+    - 更新 `.trae/rules/project_rules.md`：
+      - 在核心技术栈或推荐模式中加入 “React 组件在线预览：`@codesandbox/sandpack-react`（客户端组件）”。
+      - 规范要点：仅客户端组件、`template: react-ts`、通过 `files` 注入、避免 SSR、注意体积与首次编译时间。
+    - 更新 `prd/docs/technical-stack.md`：
+      - 新增 “Sandpack 集成说明” 小节：版本建议、安装、最小使用示例（`Provider/Layout/Preview`）、常见问题（SSR/高度/默认入口文件）。
+
+**Impact Analysis（影响面分析）**：
+- Files Modified：
+  - `src/components/ReactPreview.tsx`
+  - `.trae/rules/project_rules.md`
+  - `prd/docs/technical-stack.md`
+  - `package.json`（新增依赖）
+- Potential Risks：
+  - 首次加载体积与打包时间增加；可通过懒加载该组件或在文档中提示。
+  - 仅客户端可用，服务端渲染页面不可直接引入；已保留 `"use client"`。
+  - 用户传入的 `code` 必须导出默认 `App` 组件；在文档中明确这一要求。
+  - 如需主题或更复杂交互（编辑器等），后续再按需扩展。

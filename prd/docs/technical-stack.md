@@ -41,6 +41,38 @@
 
 - 单元测试：`tests/zod.test.ts` 验证成功与失败用例。
 
+## Sandpack 集成说明（已集成）
+
+- 现状：已引入 `@codesandbox/sandpack-react`，用于 React 组件在线预览与执行。
+- 安装：`pnpm add @codesandbox/sandpack-react`
+- 使用要点：
+  - 客户端组件：文件需加 `"use client"`
+  - 模板：`template="react-ts"`
+  - 通过 `files` 注入 `"/App.tsx"` 内容，代码需默认导出 `App` 组件
+- 最小示例：
+
+  ```tsx
+  "use client";
+  import { SandpackProvider, SandpackLayout, SandpackPreview } from "@codesandbox/sandpack-react";
+
+  export default function SandpackDemo() {
+    const code = `export default function App(){return <div className=\"p-4\">Hello Sandpack</div>}`;
+    return (
+      <SandpackProvider template="react-ts" files={{ "/App.tsx": code }}>
+        <SandpackLayout>
+          <SandpackPreview style={{ height: 400 }} />
+        </SandpackLayout>
+      </SandpackProvider>
+    );
+  }
+  ```
+
+- 组件封装：`src/components/ReactPreview.tsx` 已封装 Sandpack 预览，只需传入 `code`、`height`、`className` 即可。
+- 注意事项：
+  - 仅客户端使用，避免在 Server Components 中直接引入
+  - 首次加载体积与编译时间增加，必要时对组件进行懒加载
+  - 传入的 `code` 必须默认导出 `App` 组件，否则无法渲染
+
 ## Three.js 集成指南
 
 - 当前状态：项目暂未引入 `three`。以下为规范化引入与使用建议。
@@ -141,6 +173,7 @@ graph TD
   Shadcn --> CVA[CVA/clsx/tailwind-merge]
   Zod[Zod 校验] --> React
   Three[Three.js 指南] --> React
+  Sandpack[Sandpack 预览] --> React
 ```
 
 ## 开发环境配置
