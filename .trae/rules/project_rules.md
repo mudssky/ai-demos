@@ -105,6 +105,34 @@
   - ❌ 禁止滥用 `useEffect`（优先 Server Components 或事件）
   - ❌ 禁止 jQuery 或直接 DOM 操作（使用 Ref）
 
+## 📖 文档与注释规范
+
+- **DocStrings**
+  - 所有导出（Exported）的函数、类、接口必须包含标准的 **JSDoc/TSDoc** 注释。
+  - 必须包含 `@param`、`@returns` 和 `@throws`（如果有）。
+- **"Why" over "What"**
+  - ❌ 禁止：`// 循环遍历列表` (描述语法)
+  - ✅ 必须：`// 过滤掉未激活用户以防止计费错误` (描述业务意图)
+- **Complex Logic**
+  - 对于复杂度超过 5 行的逻辑块，必须在代码上方添加解释性注释。
+- **TODOs**
+  - 所有的技术债务必须标记为 `// TODO(User): [描述]`，严禁留下未标记的临时代码。
+
+## 🛡️ 可维护性与代码原则
+
+- **SOLID Principles**
+  - 严格遵守单一职责原则 (SRP)。
+  - 如果一个文件超过 200 行，或者一个函数超过 50 行，必须主动提议拆分。
+- **Error Handling**
+  - 严禁使用空的 `try/catch`。
+  - 所有的 Promise 必须 handle rejection。
+  - 错误信息必须包含上下文，能够追溯到具体的业务流程。
+- **Naming**
+  - 变量名必须全拼，禁止无意义的缩写 (e.g., 使用 `userProfile` 而不是 `uP`)。
+  - 布尔值变量必须使用 `is`, `has`, `should` 前缀。
+- **Boy Scout Rule**
+  - 修改现有代码时，如果你发现了显而易见的 Code Smell（类型断言、魔法数字），必须顺手修复它。
+
 ## ⚡ 严格执行流（Development Workflow）
 
 - Step 1: Context Gathering（收集上下文）
@@ -158,7 +186,7 @@ d:\coding\Projects\AI\ai-demos\
 └── pnpm-lock.yaml           # pnpm 锁文件
 ```
 
-## � 严格度等级
+## 🛡️ 严格度等级
 
 - Strictness Level：High（任何 Lint 警告视为错误）
 
