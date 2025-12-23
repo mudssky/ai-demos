@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 
 search-index.json
+
+.claude/*.local.md
+.claude/*.local.json
