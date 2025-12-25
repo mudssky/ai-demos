@@ -67,6 +67,10 @@
         "ENABLE_GUI": "true",
         "WEB_PORT": "36601"
       }
+    },
+    "lean-spec": {
+      "command": "npx",
+      "args": ["-y", "@leanspec/mcp", "--project", "${workspaceFolder}"]
     }
   }
 }
