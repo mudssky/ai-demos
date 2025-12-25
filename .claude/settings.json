@@ -16,9 +16,12 @@
   "allowedMcpServers": [
     {
       "serverName": "context7"
+    },
+    {
+      "serverName": "lean-spec"
     }
   ],
-  "enabledMcpjsonServers": ["context7"],
+  "enabledMcpjsonServers": ["context7", "lean-spec"],
   "disabledMcpjsonServers": [
     "git",
     "gitmcp",

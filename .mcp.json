@@ -69,8 +69,8 @@
       }
     },
     "lean-spec": {
-      "command": "npx",
-      "args": ["-y", "@leanspec/mcp", "--project", "${workspaceFolder}"]
+      "command": "bun",
+      "args": ["x", "lean-spec", "mcp"]
     }
   }
 }
