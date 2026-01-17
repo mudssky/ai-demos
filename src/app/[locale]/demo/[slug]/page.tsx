@@ -24,18 +24,14 @@ export async function generateStaticParams(): Promise<
   return pairs;
 }
 
-export default async function DemoDetail({ params }: { params: unknown }) {
-  let resolvedParams: { locale: string; slug: string };
-  if (params && typeof (params as Promise<unknown>).then === "function") {
-    resolvedParams = await (params as Promise<{
-      locale: string;
-      slug: string;
-    }>);
-  } else {
-    resolvedParams = params as { locale: string; slug: string };
-  }
-  const locale: Locale = ensureLocale(resolvedParams.locale);
-  const demo = await getDemoBySlug(resolvedParams.slug, locale);
+export default async function DemoDetail({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}) {
+  const { locale: localeStr, slug } = await params;
+  const locale: Locale = ensureLocale(localeStr);
+  const demo = await getDemoBySlug(slug, locale);
   const tDemo = await getTranslations({ locale, namespace: "Demo" });
   const isHtml = demo.entry === "/index.html";
   const titleText = demo.title as string;

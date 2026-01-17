@@ -14,15 +14,10 @@ export default async function LocaleLayout({
   params,
 }: {
   children: ReactNode;
-  params: unknown;
+  params: Promise<{ locale: string }>;
 }) {
-  let resolvedParams: { locale: string };
-  if (params && typeof (params as Promise<unknown>).then === "function") {
-    resolvedParams = await (params as Promise<{ locale: string }>);
-  } else {
-    resolvedParams = params as { locale: string };
-  }
-  const locale = resolvedParams?.locale === "zh-CN" ? "zh-CN" : "en-US";
+  const { locale: localeStr } = await params;
+  const locale = localeStr === "zh-CN" ? "zh-CN" : "en-US";
   let messages: Record<string, unknown>;
   try {
     messages = (await import(`../../../messages/${locale}.json`)).default;
