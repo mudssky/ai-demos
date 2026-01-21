@@ -13,6 +13,15 @@ import {
   loadBookmarkState,
   saveBookmarkState,
 } from "@/lib/bookmark-storage";
+import {
+  buildCsvReport,
+  buildHtmlExport,
+  cloneBookmarks,
+  matchesQuery,
+  mergeBookmarks,
+  parseBookmarksFromHtml,
+  parseBookmarksFromJson,
+} from "./utils";
 
 const DEFAULT_SETTINGS: BookmarkSettings = { concurrency: 8 };
 const MAX_CONCURRENCY = 32;
@@ -29,98 +38,6 @@ function createId() {
   return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function normalizeUrl(value: string): string {
-  try {
-    const url = new URL(value);
-    const normalized = `${url.protocol}//${url.hostname}${url.pathname}`;
-    return normalized.endsWith("/") && url.pathname !== "/"
-      ? normalized.slice(0, -1)
-      : normalized;
-  } catch {
-    return value.trim();
-  }
-}
-
-function mergeBookmarks(bookmarks: BookmarkEntry[]): BookmarkEntry[] {
-  const map = new Map<string, BookmarkEntry>();
-  for (const item of bookmarks) {
-    const key = normalizeUrl(item.url);
-    const existing = map.get(key);
-    if (!existing) {
-      map.set(key, { ...item, url: key });
-      continue;
-    }
-    const mergedTags = new Set([
-      ...(existing.tags ?? []),
-      ...(item.tags ?? []),
-    ]);
-    map.set(key, {
-      ...existing,
-      title: existing.title || item.title,
-      folderPath: existing.folderPath || item.folderPath,
-      tags: mergedTags.size ? Array.from(mergedTags) : existing.tags,
-    });
-  }
-  return Array.from(map.values());
-}
-
-function parseBookmarksFromHtml(html: string): BookmarkEntry[] {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
-  const root = doc.querySelector("dl");
-  if (!root) return [];
-  const results: BookmarkEntry[] = [];
-
-  const walk = (dl: Element, path: string[]) => {
-    const children = Array.from(dl.children);
-    for (const child of children) {
-      if (child.tagName.toLowerCase() !== "dt") continue;
-      const link = child.querySelector(":scope > a");
-      const folder = child.querySelector(":scope > h3");
-
-      if (link) {
-        const href = link.getAttribute("href");
-        if (!href) continue;
-        results.push({
-          id: createId(),
-          url: href,
-          title: link.textContent?.trim() || href,
-          folderPath: path.length ? path.join("/") : undefined,
-        });
-      }
-
-      if (folder) {
-        const folderName = folder.textContent?.trim();
-        const nestedDl =
-          child.querySelector(":scope > dl") ??
-          (child.nextElementSibling?.tagName.toLowerCase() === "dl"
-            ? child.nextElementSibling
-            : null);
-        if (folderName && nestedDl) {
-          walk(nestedDl, [...path, folderName]);
-        }
-      }
-    }
-  };
-
-  walk(root, []);
-  return results;
-}
-
-function parseBookmarksFromJson(json: string): BookmarkEntry[] {
-  const raw = JSON.parse(json);
-  const list: Array<{ url: string; title?: string; folderPath?: string }> =
-    Array.isArray(raw) ? raw : (raw?.bookmarks ?? []);
-  return list
-    .filter((item) => typeof item.url === "string")
-    .map((item) => ({
-      id: createId(),
-      url: item.url,
-      title: item.title?.trim() || item.url,
-      folderPath: item.folderPath,
-    }));
-}
-
 function downloadFile(content: string, filename: string, type: string) {
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
@@ -131,83 +48,8 @@ function downloadFile(content: string, filename: string, type: string) {
   URL.revokeObjectURL(url);
 }
 
-function buildHtmlExport(bookmarks: BookmarkEntry[]) {
-  const tree = new Map<string, BookmarkEntry[]>();
-  for (const item of bookmarks) {
-    const folder = item.folderPath ?? "";
-    const list = tree.get(folder) ?? [];
-    list.push(item);
-    tree.set(folder, list);
-    if (folder) {
-      const parts = folder.split("/");
-      let current = "";
-      for (const part of parts.slice(0, -1)) {
-        current = current ? `${current}/${part}` : part;
-        if (!tree.has(current)) tree.set(current, []);
-      }
-    }
-  }
-
-  const renderFolder = (path: string): string => {
-    const items = tree.get(path) ?? [];
-    const folderHtml = items
-      .map((item) => `<DT><A HREF="${item.url}">${item.title}</A></DT>`)
-      .join("\n");
-    const depth = path ? path.split("/").length : 0;
-    const subfolders = Array.from(tree.keys())
-      .filter((key) => key.startsWith(path) && key !== path)
-      .filter((key) => key.split("/").length === depth + 1)
-      .map((key) => {
-        const name = key.split("/").pop() ?? key;
-        return `\n<DT><H3>${name}</H3></DT>\n<DL><p>${renderFolder(
-          key,
-        )}</p></DL>`;
-      })
-      .join("\n");
-    return `${folderHtml}${subfolders}`;
-  };
-
-  const body = renderFolder("");
-  return `<!DOCTYPE NETSCAPE-Bookmark-file-1>\n<DL><p>${body}</p></DL>`;
-}
-
-function buildCsvReport(bookmarks: BookmarkEntry[]) {
-  const header = ["url", "title", "status", "responseTimeMs"].join(",");
-  const lines = bookmarks.map((item) =>
-    [
-      item.url,
-      (item.title ?? "").replace(/"/g, ""),
-      item.status ?? "",
-      item.responseTimeMs ?? "",
-    ]
-      .map((value) => `"${value}"`)
-      .join(","),
-  );
-  return [header, ...lines].join("\n");
-}
-
-function cloneBookmarks(list: BookmarkEntry[]): BookmarkEntry[] {
-  return list.map((item) => ({
-    ...item,
-    tags: item.tags ? [...item.tags] : undefined,
-    aiSuggestedTags: item.aiSuggestedTags
-      ? [...item.aiSuggestedTags]
-      : undefined,
-  }));
-}
-
-function matchesQuery(item: BookmarkEntry, query: string) {
-  const q = query.trim().toLowerCase();
-  if (!q) return true;
-  const fields = [
-    item.title,
-    item.url,
-    item.folderPath ?? "",
-    ...(item.tags ?? []),
-  ]
-    .filter(Boolean)
-    .map((value) => value.toLowerCase());
-  return fields.some((value) => value.includes(q));
+function withIds(list: BookmarkEntry[]): BookmarkEntry[] {
+  return list.map((item) => ({ ...item, id: createId() }));
 }
 
 export default function BookmarkOrganizerDemo() {
@@ -309,9 +151,11 @@ export default function BookmarkOrganizerDemo() {
     setError(null);
     const text = await file.text();
     try {
-      const imported = file.name.endsWith(".html")
-        ? parseBookmarksFromHtml(text)
-        : parseBookmarksFromJson(text);
+      const imported = withIds(
+        file.name.endsWith(".html")
+          ? parseBookmarksFromHtml(text)
+          : parseBookmarksFromJson(text),
+      );
       const merged = mergeBookmarks([...bookmarks, ...imported]);
       setBookmarks(merged);
       setStatus(`导入 ${imported.length} 条书签，合并后共 ${merged.length} 条`);
