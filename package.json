@@ -17,7 +17,8 @@
     "qa": "pnpm typecheck:fast && pnpm biome:fixAll && pnpm test",
     "qa:slow": "pnpm typecheck && pnpm biome:fixAll && pnpm test",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:generate:demo": "node scripts/generate-demo-tests.mjs"
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^0.2.1",
