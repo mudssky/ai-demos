@@ -25,6 +25,7 @@ export default async function LocaleHome({
   const htmlCount = demos.filter((d) => d.type === "html").length;
   const reactCount = demos.filter((d) => d.type === "react").length;
   const tagCount = new Set(demos.flatMap((d) => d.tags)).size;
+  const featured = demos.find((d) => d.slug === "bookmark-organizer");
   return (
     <div className="space-y-10">
       <section className="relative z-20 rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur">
@@ -78,6 +79,24 @@ export default async function LocaleHome({
         </div>
       </section>
 
+      {featured ? (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-slate-900">
+              {isZh ? "推荐入口" : "Featured Entry"}
+            </h2>
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              {isZh ? "功能型 Demo" : "Functional Demo"}
+            </span>
+          </div>
+          <DemoCard
+            demo={featured}
+            href={featured.route ?? `/${locale}/demo/${featured.slug}`}
+            className="border-primary/20 bg-primary/5"
+          />
+        </section>
+      ) : null}
+
       <section className="relative z-0 space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-1">
@@ -100,7 +119,7 @@ export default async function LocaleHome({
             <DemoCard
               key={d.slug}
               demo={d}
-              href={`/${locale}/demo/${d.slug}`}
+              href={d.route ?? `/${locale}/demo/${d.slug}`}
             />
           ))}
         </div>

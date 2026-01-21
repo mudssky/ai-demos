@@ -52,7 +52,7 @@ const SearchBar: FC<SearchBarProps> = ({ items, locale, className }) => {
               results.map((d) => (
                 <Link
                   key={d.slug}
-                  href={`/${locale}/demo/${d.slug}`}
+                  href={d.route ?? `/${locale}/demo/${d.slug}`}
                   className="block px-4 py-3 text-sm transition-colors hover:bg-slate-100"
                 >
                   <div className="flex items-center justify-between">

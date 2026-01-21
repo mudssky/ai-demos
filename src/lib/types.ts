@@ -65,11 +65,13 @@ export interface DemoSummary {
   tags: string[];
   ai: Pick<AIData, "model" | "agent">;
   createdAt: string;
+  route?: string;
 }
 
 export interface GetAllDemosOptions {
   locale?: Locale;
   withContent?: boolean;
+  includeAppDemos?: boolean;
 }
 
 export interface SearchIndexEntry {

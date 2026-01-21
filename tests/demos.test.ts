@@ -12,6 +12,7 @@ describe("demos data layer", () => {
     const slugs = list.map((d) => d.slug);
     expect(slugs).toContain("hello-html");
     expect(slugs).toContain("hello-react");
+    expect(slugs).toContain("bookmark-organizer");
     const html = list.find((d) => d.slug === "hello-html");
     expect(html).toBeDefined();
     if (!html) throw new Error("missing hello-html");
@@ -20,6 +21,10 @@ describe("demos data layer", () => {
     expect(react).toBeDefined();
     if (!react) throw new Error("missing hello-react");
     expect(react.title).toBe("Hello React");
+    const appDemo = list.find((d) => d.slug === "bookmark-organizer");
+    expect(appDemo).toBeDefined();
+    if (!appDemo) throw new Error("missing bookmark-organizer");
+    expect(appDemo.title).toBe("Bookmark Organizer");
   });
 
   it("localizes to zh-CN with fallback", async () => {
@@ -33,6 +38,10 @@ describe("demos data layer", () => {
     if (!react) throw new Error("missing hello-react");
     // react zh missing, should fallback to en
     expect(react.title).toBe("Hello React");
+    const appDemo = list.find((d) => d.slug === "bookmark-organizer");
+    expect(appDemo).toBeDefined();
+    if (!appDemo) throw new Error("missing bookmark-organizer");
+    expect(appDemo.title).toBe("Bookmark Organizer");
   });
 
   it("gets demo by slug with content and entry", async () => {
@@ -50,8 +59,8 @@ describe("demos data layer", () => {
     expect(htmlOnly.length).toBe(1);
     expect(htmlOnly[0].slug).toBe("hello-html");
     const deepseek = filterDemos(list, { model: "deepseek-v2" });
-    expect(deepseek.length).toBe(1);
-    expect(deepseek[0].slug).toBe("hello-react");
+    const deepseekSlugs = deepseek.map((d) => d.slug).sort();
+    expect(deepseekSlugs).toEqual(["bookmark-organizer", "hello-react"]);
   });
 
   it("query filters across fields", async () => {

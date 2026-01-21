@@ -68,11 +68,11 @@ The system SHALL group invalid or unreachable bookmarks and allow batch removal.
 - **THEN** unreachable bookmarks are removed from the list
 
 ### Requirement: AI organization
-The system SHALL call the deepseek model via ai-sdk to generate tags and batch rename suggestions.
+The system SHALL call the deepseek model via ai-sdk to generate folder path suggestions, tags, and batch rename suggestions.
 
-#### Scenario: Generate AI tags and names
+#### Scenario: Generate AI folder, tags, and names
 - **WHEN** the user runs AI organization
-- **THEN** the system returns tags and rename suggestions for batch apply
+- **THEN** the system returns folder paths, tags, and rename suggestions for batch apply
 
 ### Requirement: Report export
 The system SHALL export a report in CSV and JSON including URL, status code, and response time.
@@ -84,3 +84,31 @@ The system SHALL export a report in CSV and JSON including URL, status code, and
 #### Scenario: Export JSON report
 - **WHEN** the user selects JSON report export
 - **THEN** a JSON report with status and latency is downloaded
+
+### Requirement: App demo metadata
+The system SHALL read demo metadata from `src/app/demo/**/meta.json` and include it in the demo list.
+
+#### Scenario: List app demo metadata
+- **WHEN** the demo list is generated
+- **THEN** app demos with valid meta.json are included alongside `_demos` entries
+
+### Requirement: Bookmark search
+The system SHALL provide text search over bookmark title, URL, tags, and folder path.
+
+#### Scenario: Search bookmarks
+- **WHEN** the user enters a search query
+- **THEN** the list filters to matching bookmarks
+
+### Requirement: Bulk editing
+The system SHALL support batch edits for selected bookmarks.
+
+#### Scenario: Apply batch edit
+- **WHEN** the user applies a bulk edit action
+- **THEN** selected bookmarks are updated together
+
+### Requirement: Tag management panel
+The system SHALL provide a tag panel to review and apply tags to bookmarks.
+
+#### Scenario: Apply tag from panel
+- **WHEN** the user selects a tag from the panel
+- **THEN** the tag is applied or filtered as configured

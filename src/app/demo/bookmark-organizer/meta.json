@@ -1,0 +1,21 @@
+{
+  "id": "demo-bookmark-organizer",
+  "slug": "bookmark-organizer",
+  "title": { "en": "Bookmark Organizer" },
+  "description": {
+    "en": "Chrome bookmark import, dedupe, AI tagging, reachability checks, and reporting"
+  },
+  "type": "react",
+  "ai": {
+    "model": "deepseek-v2",
+    "agent": "vscode",
+    "provider": "deepseek",
+    "temperature": 0.1
+  },
+  "prompt": {
+    "main": "Build a Next.js bookmark organizer demo with import/export, reachability checks, and AI tagging"
+  },
+  "tags": ["nextjs", "bookmarks", "ai", "productivity"],
+  "createdAt": "2026-01-18T00:00:00.000Z",
+  "version": "1.0.0"
+}

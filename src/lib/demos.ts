@@ -15,6 +15,7 @@ import type {
 } from "./types";
 
 const DEMOS_DIR = "_demos";
+const APP_DEMOS_DIR = path.join("src", "app", "demo");
 
 function resolveDemoRoot(): string {
   return path.join(process.cwd(), DEMOS_DIR);
@@ -63,6 +64,27 @@ async function listDemoDirs(): Promise<string[]> {
   return entries
     .filter((e) => e.isDirectory())
     .map((e) => path.join(root, e.name));
+}
+
+async function listAppDemoMetaFiles(): Promise<string[]> {
+  const root = path.join(process.cwd(), APP_DEMOS_DIR);
+  if (!(await pathExists(root))) return [];
+  const results: string[] = [];
+  const stack = [root];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (!current) continue;
+    const entries = await fs.readdir(current, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(fullPath);
+      } else if (entry.isFile() && entry.name === "meta.json") {
+        results.push(fullPath);
+      }
+    }
+  }
+  return results;
 }
 
 function toSummary(meta: DemoMeta, locale: Locale = "en-US"): DemoSummary {
@@ -114,6 +136,7 @@ export async function getAllDemos(
 ): Promise<Array<Demo | DemoSummary>> {
   const locale = options?.locale ?? "en-US";
   const withContent = options?.withContent === true;
+  const includeAppDemos = options?.includeAppDemos !== false;
   const dirs = await listDemoDirs();
   const items: Array<Demo | DemoSummary> = [];
   for (const dir of dirs) {
@@ -129,6 +152,16 @@ export async function getAllDemos(
       items.push(demo);
     } else {
       items.push(toSummary(meta, locale));
+    }
+  }
+  if (!withContent && includeAppDemos) {
+    const appMetaFiles = await listAppDemoMetaFiles();
+    for (const metaPath of appMetaFiles) {
+      const meta = await readJSON<DemoMeta>(metaPath);
+      items.push({
+        ...toSummary(meta, locale),
+        route: `/demo/${meta.slug}`,
+      });
     }
   }
   return items;

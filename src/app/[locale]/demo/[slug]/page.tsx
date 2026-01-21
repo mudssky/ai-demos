@@ -14,7 +14,11 @@ export async function generateStaticParams(): Promise<
   Array<{ locale: Locale; slug: string }>
 > {
   const locales: Locale[] = ["en-US", "zh-CN"];
-  const demos = await getAllDemos({ withContent: false, locale: "en-US" });
+  const demos = await getAllDemos({
+    withContent: false,
+    locale: "en-US",
+    includeAppDemos: false,
+  });
   const pairs: Array<{ locale: Locale; slug: string }> = [];
   for (const d of demos) {
     for (const l of locales) {

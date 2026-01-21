@@ -16,6 +16,9 @@
 - Decision: 引入开源存储库实现 IndexedDB + localStorage 降级（如 `localforage`）。
 - Decision: 使用 ai-sdk 与 deepseek provider，密钥读取自 `.env.local`。
 - Decision: 以 URL 作为主键去重，标题作为次要合并依据，保留首次出现的基础字段。
+- Decision: 并发设置默认值为 8，最大值为 32。
+- Decision: AI 输出包含目录结构（folder path）、标签与重命名建议。
+- Decision: Demo 元信息从 `src/app/demo/**/meta.json` 读取并并入列表展示。
 
 ## Risks / Trade-offs
 - AI 与检测请求可能耗时较长 → 通过并发设置与进度提示缓解。
@@ -27,5 +30,4 @@
 - 新增依赖与环境变量后再落地实现。
 
 ## Open Questions
-- 并发默认值与最大值是否有明确限制？
-- AI 输出的分类层级是否需要固定格式？
+- 无
