@@ -9,20 +9,34 @@ export interface ReactPreviewProps {
   title?: string;
 }
 
+function normalizeReactCode(code: string): string {
+  return (
+    code
+      // Remove imports because the sandbox provides React/ReactDOM globals.
+      .replace(/^\s*import\s.+?;?\s*$/gm, "")
+      // Remove default export so App is in scope for render.
+      .replace(/^\s*export\s+default\s+/m, "")
+      // Remove trailing default export statements if present.
+      .replace(/^\s*export\s+default\s+[\w$]+\s*;?\s*$/m, "")
+      .trim()
+  );
+}
+
 function buildSrcDoc(code: string): string {
-  const safeCode = code.replaceAll("</script>", "<\\/script>");
+  const normalized = normalizeReactCode(code);
+  const safeCode = normalized.replaceAll("</script>", "<\\/script>");
   const html = [
     "<!doctype html>",
     "<html>",
     "<head>",
     '<meta charset="utf-8"/>',
     '<meta name="viewport" content="width=device-width,initial-scale=1"/>',
-    "<style>html,body,#root{height:100%;margin:0;padding:0;}</style>",
+    "<style>html,body{height:100%;margin:0;padding:0;overflow:hidden;}*,*::before,*::after{box-sizing:border-box;}#root{height:100%;}</style>",
     "</head>",
     "<body>",
     '<div id="root"></div>',
-    '<script src="https://unpkg.com/react@19.2.0/umd/react.development.js"></script>',
-    '<script src="https://unpkg.com/react-dom@19.2.0/umd/react-dom.development.js"></script>',
+    '<script src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>',
+    '<script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>',
     '<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.26.7/babel.min.js"></script>',
     '<script>window.onerror=function(m){var el=document.createElement("pre");el.textContent=String(m);el.style.color="red";document.body.appendChild(el);};</script>',
     '<script type="text/babel" data-presets="typescript,react">',
