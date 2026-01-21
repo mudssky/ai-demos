@@ -28,17 +28,34 @@ export default async function LocaleLayout({
   return (
     <div className={cn("min-h-screen bg-background text-foreground")}>
       <NextIntlClientProvider locale={locale} messages={messages}>
-        <header className="border-b">
-          <div className="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between">
-            <Link href="/en-US" className="font-semibold">
-              AI Demos
-            </Link>
-            <nav className="text-sm">
-              <LocaleSwitch currentLocale={locale} />
-            </nav>
-          </div>
-        </header>
-        <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>
+        <div className="relative overflow-hidden">
+          <div className="pointer-events-none absolute -top-32 right-10 h-72 w-72 rounded-full bg-primary/20 blur-3xl float-slow" />
+          <div className="pointer-events-none absolute top-40 -left-24 h-72 w-72 rounded-full bg-accent/25 blur-3xl float-slow" />
+          <div className="pointer-events-none absolute bottom-0 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-secondary/20 blur-3xl" />
+
+          <header className="relative z-10">
+            <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
+              <Link
+                href={`/${locale}`}
+                className="group inline-flex items-center gap-3"
+              >
+                <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-sm transition-transform duration-200 group-hover:-translate-y-0.5">
+                  AI
+                </span>
+                <span className="text-lg font-semibold tracking-tight">
+                  AI Demos
+                </span>
+              </Link>
+              <nav className="text-sm">
+                <LocaleSwitch currentLocale={locale} />
+              </nav>
+            </div>
+          </header>
+
+          <main className="relative z-10 mx-auto max-w-6xl px-4 pb-16 pt-4">
+            {children}
+          </main>
+        </div>
       </NextIntlClientProvider>
     </div>
   );

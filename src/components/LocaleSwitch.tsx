@@ -23,7 +23,10 @@ const LocaleSwitch: FC<Props> = ({ currentLocale }) => {
   })();
 
   return (
-    <Link href={href} className="text-sm rounded border px-2 py-1">
+    <Link
+      href={href}
+      className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-sm font-medium text-slate-700 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-900 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+    >
       {label}
     </Link>
   );

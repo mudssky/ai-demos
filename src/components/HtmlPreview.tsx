@@ -18,7 +18,12 @@ const HtmlPreview: FC<HtmlPreviewProps> = ({
   const iframeHeight =
     typeof height === "number" ? `${height}px` : (height ?? "400px");
   return (
-    <div className={cn("w-full border rounded-md overflow-hidden", className)}>
+    <div
+      className={cn(
+        "w-full overflow-hidden rounded-2xl border border-slate-200 bg-white/90 shadow-sm",
+        className,
+      )}
+    >
       <iframe
         title={title ?? "HTML Preview"}
         srcDoc={html}
