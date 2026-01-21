@@ -27,7 +27,7 @@ export default async function LocaleHome({
   const tagCount = new Set(demos.flatMap((d) => d.tags)).size;
   return (
     <div className="space-y-10">
-      <section className="rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur">
+      <section className="relative z-20 rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur">
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
@@ -78,7 +78,7 @@ export default async function LocaleHome({
         </div>
       </section>
 
-      <section className="space-y-4">
+      <section className="relative z-0 space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-1">
             <h2 className="text-lg font-semibold text-slate-900">

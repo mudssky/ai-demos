@@ -20,7 +20,7 @@ const SearchBar: FC<SearchBarProps> = ({ items, locale, className }) => {
   const labelStats = isZh ? "结果" : "results";
   const labelEmpty = isZh ? "无匹配" : "No matches";
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("relative z-30", className)}>
       <input
         aria-label="search"
         value={query}
@@ -34,7 +34,7 @@ const SearchBar: FC<SearchBarProps> = ({ items, locale, className }) => {
         className="w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm shadow-sm backdrop-blur transition-all duration-200 placeholder:text-slate-400 focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/30"
       />
       {open && query.trim().length > 0 ? (
-        <div className="absolute z-10 mt-3 w-full rounded-2xl border border-slate-200 bg-white/95 shadow-lg backdrop-blur">
+        <div className="absolute z-50 mt-3 w-full rounded-2xl border border-slate-200 bg-white/95 shadow-lg backdrop-blur">
           <div className="flex items-center justify-between px-4 py-2 text-xs text-muted-foreground">
             <span>
               {total} {labelStats}
