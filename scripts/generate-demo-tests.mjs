@@ -155,7 +155,7 @@ async function generateDemos() {
     const metaPath = path.join(demoDir, "meta.json");
     if (!(await pathExists(metaPath))) continue;
     const htmlPath = path.join(demoDir, "index.html");
-    const tsxPath = path.join(demoDir, "App.tsx");
+    const _tsxPath = path.join(demoDir, "App.tsx");
     const contentFile = (await pathExists(htmlPath)) ? "index.html" : "App.tsx";
     const testPath = path.join(DEMO_TESTS_DIR, `${entry.name}.test.ts`);
     if (await pathExists(testPath)) continue;
