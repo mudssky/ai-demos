@@ -4,6 +4,14 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReadmeDialog from "@/components/ReadmeDialog";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -860,88 +868,118 @@ export default function BookmarkOrganizerDemo() {
           </div>
           <div className="space-y-2">
             <Label>批量编辑</Label>
-            <div className="grid gap-2">
-              <Input
-                value={bulkTitle}
-                onChange={(event) => setBulkTitle(event.target.value)}
-                placeholder="批量标题（可选）"
-              />
-              <Input
-                value={bulkFolder}
-                onChange={(event) => setBulkFolder(event.target.value)}
-                placeholder="批量目录（可选）"
-              />
-              <Input
-                value={bulkTags}
-                onChange={(event) => setBulkTags(event.target.value)}
-                placeholder="批量标签（逗号分隔）"
-              />
-              <label className="flex items-center gap-2 text-xs text-slate-600">
-                <input
-                  type="checkbox"
-                  checked={appendTagsOnly}
-                  onChange={(event) => setAppendTagsOnly(event.target.checked)}
-                />
-                仅追加标签（不覆盖已有标签）
-              </label>
-              {bulkPreview ? (
-                <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
-                  预览：{bulkPreview}
-                </div>
-              ) : null}
-              {bulkPreviewItems.length > 0 ? (
-                <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-                  <div className="font-semibold">
-                    仅预览变化的列表（{bulkPreviewItems.length}）
-                  </div>
-                  <div className="mt-2 space-y-1">
-                    {bulkPreviewItems.slice(0, 6).map((item) => (
-                      <div key={item.id} className="flex items-center gap-2">
-                        <span className="truncate">{item.title}</span>
-                        <span className="text-[10px] uppercase text-slate-400">
-                          {item.changes.join("/")}
-                        </span>
-                      </div>
-                    ))}
-                    {bulkPreviewItems.length > 6 ? (
-                      <div className="text-slate-500">
-                        还有 {bulkPreviewItems.length - 6} 条未显示
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              ) : null}
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant="default"
-                  onClick={handleBulkApply}
-                >
-                  应用到选中项 ({selectedIds.length})
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setSelectedIds([])}
-                >
-                  清空选择
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handlePreviewBulk}
-                >
-                  预览批量编辑
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleUndoBulk}
-                >
-                  撤销批量编辑
-                </Button>
+            <Dialog>
+              <div className="flex flex-wrap items-center gap-2">
+                <DialogTrigger asChild>
+                  <Button type="button" variant="outline">
+                    打开批量编辑
+                  </Button>
+                </DialogTrigger>
+                <span className="text-xs text-muted-foreground">
+                  已选 {selectedIds.length} 项
+                </span>
+                {bulkPreview ? (
+                  <span className="text-xs text-emerald-700">
+                    预览：{bulkPreview}
+                  </span>
+                ) : null}
               </div>
-            </div>
+              <DialogContent className="sm:max-w-xl">
+                <DialogHeader>
+                  <DialogTitle>批量编辑</DialogTitle>
+                  <DialogDescription>
+                    对选中书签批量更新标题、目录与标签。
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-2">
+                  <Input
+                    value={bulkTitle}
+                    onChange={(event) => setBulkTitle(event.target.value)}
+                    placeholder="批量标题（可选）"
+                  />
+                  <Input
+                    value={bulkFolder}
+                    onChange={(event) => setBulkFolder(event.target.value)}
+                    placeholder="批量目录（可选）"
+                  />
+                  <Input
+                    value={bulkTags}
+                    onChange={(event) => setBulkTags(event.target.value)}
+                    placeholder="批量标签（逗号分隔）"
+                  />
+                  <label className="flex items-center gap-2 text-xs text-slate-600">
+                    <input
+                      type="checkbox"
+                      checked={appendTagsOnly}
+                      onChange={(event) =>
+                        setAppendTagsOnly(event.target.checked)
+                      }
+                    />
+                    仅追加标签（不覆盖已有标签）
+                  </label>
+                  {bulkPreview ? (
+                    <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+                      预览：{bulkPreview}
+                    </div>
+                  ) : null}
+                  {bulkPreviewItems.length > 0 ? (
+                    <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                      <div className="font-semibold">
+                        仅预览变化的列表（{bulkPreviewItems.length}）
+                      </div>
+                      <div className="mt-2 space-y-1">
+                        {bulkPreviewItems.slice(0, 6).map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex items-center gap-2"
+                          >
+                            <span className="truncate">{item.title}</span>
+                            <span className="text-[10px] uppercase text-slate-400">
+                              {item.changes.join("/")}
+                            </span>
+                          </div>
+                        ))}
+                        {bulkPreviewItems.length > 6 ? (
+                          <div className="text-slate-500">
+                            还有 {bulkPreviewItems.length - 6} 条未显示
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  ) : null}
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      variant="default"
+                      onClick={handleBulkApply}
+                    >
+                      应用到选中项 ({selectedIds.length})
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => setSelectedIds([])}
+                    >
+                      清空选择
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handlePreviewBulk}
+                    >
+                      预览批量编辑
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleUndoBulk}
+                    >
+                      撤销批量编辑
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
         <div className="rounded-lg border">
