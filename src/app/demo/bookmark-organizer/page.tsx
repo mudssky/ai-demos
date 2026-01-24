@@ -711,13 +711,13 @@ export default function BookmarkOrganizerDemo() {
         </div>
 
         <div className="space-y-4">
-          <div className="space-y-4 rounded-lg border p-4">
-            <div className="text-sm font-medium">统计</div>
-            <div className="space-y-2 text-sm">
-              <div>书签数量：{bookmarks.length}</div>
-              <div>筛选结果：{filteredBookmarks.length}</div>
-              <div>失效链接：{invalidBookmarks.length}</div>
-              <div>并发设置：{settings.concurrency}</div>
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border p-4 text-sm">
+            <div className="font-medium">统计</div>
+            <div className="flex flex-wrap gap-3 text-muted-foreground">
+              <span>书签数量：{bookmarks.length}</span>
+              <span>筛选结果：{filteredBookmarks.length}</span>
+              <span>失效链接：{invalidBookmarks.length}</span>
+              <span>并发设置：{settings.concurrency}</span>
             </div>
           </div>
           <div className="space-y-3 rounded-lg border p-4">
