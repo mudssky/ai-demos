@@ -7,6 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   type BookmarkEntry,
   type BookmarkOrganizerState,
   type BookmarkSettings,
@@ -936,83 +944,102 @@ export default function BookmarkOrganizerDemo() {
             </div>
           </div>
         </div>
-        <div className="overflow-hidden rounded-lg border">
-          <div className="grid grid-cols-[auto,2fr,1fr,1fr,1fr] items-center gap-2 border-b bg-muted px-4 py-2 text-xs font-semibold uppercase">
-            <div>
-              <input
-                type="checkbox"
-                checked={allFilteredSelected}
-                onChange={handleToggleSelectAll}
-                aria-label="select all"
-              />
-            </div>
-            <div>标题/URL</div>
-            <div>目录/标签</div>
-            <div>状态</div>
-            <div>AI 建议</div>
-          </div>
-          <div className="divide-y">
-            {filteredBookmarks.map((item) => (
-              <div
-                key={item.id}
-                className="grid grid-cols-[auto,2fr,1fr,1fr,1fr] items-start gap-2 px-4 py-3 text-sm"
-              >
-                <div>
+        <div className="rounded-lg border">
+          <Table className="table-fixed min-w-[900px]">
+            <colgroup>
+              <col className="w-10" />
+              <col className="w-[320px]" />
+              <col className="w-[200px]" />
+              <col className="w-[140px]" />
+              <col className="w-[200px]" />
+            </colgroup>
+            <TableHeader>
+              <TableRow className="bg-muted text-xs font-semibold uppercase">
+                <TableHead className="w-10">
                   <input
                     type="checkbox"
-                    checked={selectedSet.has(item.id)}
-                    onChange={() => handleToggleSelect(item.id)}
-                    aria-label={`select ${item.title}`}
+                    checked={allFilteredSelected}
+                    onChange={handleToggleSelectAll}
+                    aria-label="select all"
                   />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    {item.faviconUrl ? (
-                      <Image
-                        src={item.faviconUrl}
-                        alt=""
-                        width={16}
-                        height={16}
-                        className="h-4 w-4"
-                        referrerPolicy="no-referrer"
-                        unoptimized
+                </TableHead>
+                <TableHead>标题/URL</TableHead>
+                <TableHead>目录/标签</TableHead>
+                <TableHead>状态</TableHead>
+                <TableHead>AI 建议</TableHead>
+              </TableRow>
+            </TableHeader>
+          </Table>
+          <div className="max-h-[60vh] overflow-auto">
+            <Table className="table-fixed min-w-[900px]">
+              <colgroup>
+                <col className="w-10" />
+                <col className="w-[320px]" />
+                <col className="w-[200px]" />
+                <col className="w-[140px]" />
+                <col className="w-[200px]" />
+              </colgroup>
+              <TableBody>
+                {filteredBookmarks.map((item) => (
+                  <TableRow key={item.id} className="text-sm">
+                    <TableCell className="align-top">
+                      <input
+                        type="checkbox"
+                        checked={selectedSet.has(item.id)}
+                        onChange={() => handleToggleSelect(item.id)}
+                        aria-label={`select ${item.title}`}
                       />
-                    ) : null}
-                    <div className="font-medium">{item.title}</div>
-                  </div>
-                  <div className="text-xs text-muted-foreground break-all">
-                    {item.url}
-                  </div>
-                </div>
-                <div className="space-y-1 text-xs">
-                  <div>{item.folderPath || "未分类"}</div>
-                  <div className="text-muted-foreground">
-                    {(item.tags ?? []).join(" / ") || "无标签"}
-                  </div>
-                </div>
-                <div className="space-y-1 text-xs">
-                  <div>
-                    {item.status === null
-                      ? "检测失败"
-                      : item.status
-                        ? `HTTP ${item.status}`
-                        : "未检测"}
-                  </div>
-                  <div className="text-muted-foreground">
-                    {item.responseTimeMs ? `${item.responseTimeMs} ms` : ""}
-                  </div>
-                </div>
-                <div className="space-y-1 text-xs">
-                  <div>{item.aiSuggestedFolder || ""}</div>
-                  <div className="text-muted-foreground">
-                    {item.aiSuggestedTitle || ""}
-                  </div>
-                  <div className="text-muted-foreground">
-                    {(item.aiSuggestedTags ?? []).join(" / ")}
-                  </div>
-                </div>
-              </div>
-            ))}
+                    </TableCell>
+                    <TableCell className="space-y-1 align-top whitespace-normal">
+                      <div className="flex items-center gap-2">
+                        {item.faviconUrl ? (
+                          <Image
+                            src={item.faviconUrl}
+                            alt=""
+                            width={16}
+                            height={16}
+                            className="h-4 w-4"
+                            referrerPolicy="no-referrer"
+                            unoptimized
+                          />
+                        ) : null}
+                        <div className="font-medium">{item.title}</div>
+                      </div>
+                      <div className="text-xs text-muted-foreground break-all">
+                        {item.url}
+                      </div>
+                    </TableCell>
+                    <TableCell className="space-y-1 align-top text-xs whitespace-normal">
+                      <div>{item.folderPath || "未分类"}</div>
+                      <div className="text-muted-foreground">
+                        {(item.tags ?? []).join(" / ") || "无标签"}
+                      </div>
+                    </TableCell>
+                    <TableCell className="space-y-1 align-top text-xs whitespace-normal">
+                      <div>
+                        {item.status === null
+                          ? "检测失败"
+                          : item.status
+                            ? `HTTP ${item.status}`
+                            : "未检测"}
+                      </div>
+                      <div className="text-muted-foreground">
+                        {item.responseTimeMs ? `${item.responseTimeMs} ms` : ""}
+                      </div>
+                    </TableCell>
+                    <TableCell className="space-y-1 align-top text-xs whitespace-normal">
+                      <div>{item.aiSuggestedFolder || ""}</div>
+                      <div className="text-muted-foreground">
+                        {item.aiSuggestedTitle || ""}
+                      </div>
+                      <div className="text-muted-foreground">
+                        {(item.aiSuggestedTags ?? []).join(" / ")}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </div>
       </section>
