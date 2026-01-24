@@ -1,9 +1,18 @@
 "use client";
 
+import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import BulkSearchInput from "@/components/BulkSearchInput";
 import ReadmeDialog from "@/components/ReadmeDialog";
 import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +23,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Table,
   TableBody,
@@ -29,6 +43,7 @@ import {
   loadBookmarkState,
   saveBookmarkState,
 } from "@/lib/bookmark-storage";
+import { cn } from "@/lib/utils";
 import {
   buildCsvReport,
   buildHtmlExport,
@@ -81,6 +96,8 @@ export default function BookmarkOrganizerDemo() {
   const [bulkFolder, setBulkFolder] = useState("");
   const [bulkTags, setBulkTags] = useState("");
   const [appendTagsOnly, setAppendTagsOnly] = useState(true);
+  const [bulkTitleOpen, setBulkTitleOpen] = useState(false);
+  const [bulkFolderOpen, setBulkFolderOpen] = useState(false);
   const [tagRemoveInput, setTagRemoveInput] = useState("");
   const [tagMergeSource, setTagMergeSource] = useState("");
   const [tagMergeTarget, setTagMergeTarget] = useState("");
@@ -162,6 +179,22 @@ export default function BookmarkOrganizerDemo() {
       .map(([tag, count]) => ({ tag, count }))
       .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
   }, [bookmarks, selectedSet]);
+
+  const bulkTitleOptions = useMemo(() => {
+    const titles = new Set<string>();
+    for (const item of bookmarks) {
+      if (item.title) titles.add(item.title);
+    }
+    return Array.from(titles).sort((a, b) => a.localeCompare(b));
+  }, [bookmarks]);
+
+  const bulkFolderOptions = useMemo(() => {
+    const folders = new Set<string>();
+    for (const item of bookmarks) {
+      if (item.folderPath) folders.add(item.folderPath);
+    }
+    return Array.from(folders).sort((a, b) => a.localeCompare(b));
+  }, [bookmarks]);
 
   const handleImport = async (file: File) => {
     setError(null);
@@ -892,16 +925,131 @@ export default function BookmarkOrganizerDemo() {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-2">
-                  <Input
-                    value={bulkTitle}
-                    onChange={(event) => setBulkTitle(event.target.value)}
-                    placeholder="批量标题（可选）"
-                  />
-                  <Input
-                    value={bulkFolder}
-                    onChange={(event) => setBulkFolder(event.target.value)}
-                    placeholder="批量目录（可选）"
-                  />
+                  <Popover open={bulkTitleOpen} onOpenChange={setBulkTitleOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={bulkTitleOpen}
+                        className="w-full max-w-[360px] justify-between"
+                      >
+                        {bulkTitle || "选择标题（可选）"}
+                        <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[--radix-popover-trigger-width] max-w-[360px] p-0">
+                      <Command>
+                        <BulkSearchInput placeholder="搜索标题" />
+                        <CommandList>
+                          <CommandEmpty>没有匹配的标题</CommandEmpty>
+                          <CommandGroup>
+                            <CommandItem
+                              value="保持不变"
+                              onSelect={() => {
+                                setBulkTitle("");
+                                setBulkTitleOpen(false);
+                              }}
+                            >
+                              <CheckIcon
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  bulkTitle === ""
+                                    ? "opacity-100"
+                                    : "opacity-0",
+                                )}
+                              />
+                              保持不变
+                            </CommandItem>
+                            {bulkTitleOptions.map((title) => (
+                              <CommandItem
+                                key={title}
+                                value={title}
+                                onSelect={(currentValue) => {
+                                  setBulkTitle(currentValue);
+                                  setBulkTitleOpen(false);
+                                }}
+                              >
+                                <CheckIcon
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    bulkTitle === title
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                {title}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <Popover
+                    open={bulkFolderOpen}
+                    onOpenChange={setBulkFolderOpen}
+                  >
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={bulkFolderOpen}
+                        className="w-full max-w-[360px] justify-between"
+                      >
+                        {bulkFolder || "选择目录（可选）"}
+                        <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[--radix-popover-trigger-width] max-w-[360px] p-0">
+                      <Command>
+                        <BulkSearchInput placeholder="搜索目录" />
+                        <CommandList>
+                          <CommandEmpty>没有匹配的目录</CommandEmpty>
+                          <CommandGroup>
+                            <CommandItem
+                              value="保持不变"
+                              onSelect={() => {
+                                setBulkFolder("");
+                                setBulkFolderOpen(false);
+                              }}
+                            >
+                              <CheckIcon
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  bulkFolder === ""
+                                    ? "opacity-100"
+                                    : "opacity-0",
+                                )}
+                              />
+                              保持不变
+                            </CommandItem>
+                            {bulkFolderOptions.map((folder) => (
+                              <CommandItem
+                                key={folder}
+                                value={folder}
+                                onSelect={(currentValue) => {
+                                  setBulkFolder(currentValue);
+                                  setBulkFolderOpen(false);
+                                }}
+                              >
+                                <CheckIcon
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    bulkFolder === folder
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                {folder}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                   <Input
                     value={bulkTags}
                     onChange={(event) => setBulkTags(event.target.value)}
