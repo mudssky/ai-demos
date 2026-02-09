@@ -33,10 +33,32 @@ The system SHALL persist bookmarks and settings in the browser using IndexedDB, 
 - **THEN** the system falls back to localStorage without data loss in-session
 
 ### Requirement: Deduplication and merge
-The system SHALL detect duplicate bookmarks by URL and merge them based on a defined strategy.
+The system SHALL detect duplicate bookmarks by a configurable URL normalization strategy, defaulting to balanced mode.
+
+The system SHALL prioritize avoiding false-positive merges (accidentally merging different pages) over maximizing merge rate.
+
+#### Scenario: Configurable strategy modes
+- **WHEN** the user views deduplication strategy options
+- **THEN** the system provides `strict`, `balanced`, and `aggressive` modes
+
+#### Scenario: Default strategy is balanced
+- **WHEN** deduplication runs without user override
+- **THEN** the system applies `balanced` mode
+
+#### Scenario: Balanced mode keeps business query differences
+- **WHEN** two bookmarks differ by business query params (for example `?id=1` vs `?id=2`)
+- **THEN** the system keeps both bookmarks as separate entries
+
+#### Scenario: Balanced mode removes tracking-only differences
+- **WHEN** two bookmarks differ only by tracking params (for example `utm_*`, `fbclid`, `gclid`)
+- **THEN** the system treats them as duplicates and merges them
+
+#### Scenario: Merge behavior for duplicate keys
+- **WHEN** multiple bookmarks map to the same normalized URL key
+- **THEN** the system merges tags by union and keeps first non-empty base fields (such as title and folder)
 
 #### Scenario: Duplicate URLs detected
-- **WHEN** multiple bookmarks share the same URL
+- **WHEN** multiple bookmarks normalize to the same dedupe key
 - **THEN** the system merges them and keeps a single entry
 
 ### Requirement: Reachability checks
