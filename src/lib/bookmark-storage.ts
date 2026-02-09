@@ -22,6 +22,7 @@ export type BookmarkEntry = {
 
 export type BookmarkSettings = {
   concurrency: number;
+  dedupeStrategy: "strict" | "balanced" | "aggressive";
 };
 
 const STORAGE_KEY = "demo:bookmark-organizer";

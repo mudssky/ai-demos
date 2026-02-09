@@ -48,15 +48,36 @@ import {
   buildCsvReport,
   buildHtmlExport,
   cloneBookmarks,
+  type DedupeStrategy,
+  isDedupeStrategy,
   matchesQuery,
   mergeBookmarks,
   parseBookmarksFromHtml,
   parseBookmarksFromJson,
 } from "./utils";
 
-const DEFAULT_SETTINGS: BookmarkSettings = { concurrency: 8 };
+const DEDUPE_STRATEGY_LABELS: Record<DedupeStrategy, string> = {
+  strict: "strict（严格）",
+  balanced: "balanced（平衡）",
+  aggressive: "aggressive（激进）",
+};
+const DEFAULT_SETTINGS: BookmarkSettings = {
+  concurrency: 8,
+  dedupeStrategy: "balanced",
+};
 const MAX_CONCURRENCY = 32;
 const MAX_HISTORY = 10;
+
+/**
+ * 解析并校验本地保存的去重策略，防止历史数据或手动篡改导致非法值。
+ * @param value 本地存储中的策略值。
+ * @returns 合法策略返回对应值，否则回退为默认 balanced。
+ */
+function resolveDedupeStrategy(
+  value: string | null | undefined,
+): DedupeStrategy {
+  return isDedupeStrategy(value) ? value : DEFAULT_SETTINGS.dedupeStrategy;
+}
 
 function clampConcurrency(value: number) {
   return Math.min(MAX_CONCURRENCY, Math.max(1, value));
@@ -118,7 +139,13 @@ export default function BookmarkOrganizerDemo() {
         setBookmarks(stored.bookmarks ?? []);
         const storedConcurrency =
           stored.settings?.concurrency ?? DEFAULT_SETTINGS.concurrency;
-        setSettings({ concurrency: clampConcurrency(storedConcurrency) });
+        const storedDedupeStrategy = resolveDedupeStrategy(
+          stored.settings?.dedupeStrategy,
+        );
+        setSettings({
+          concurrency: clampConcurrency(storedConcurrency),
+          dedupeStrategy: storedDedupeStrategy,
+        });
       })
       .finally(() => {
         if (mounted) hydratedRef.current = true;
@@ -205,9 +232,14 @@ export default function BookmarkOrganizerDemo() {
           ? parseBookmarksFromHtml(text)
           : parseBookmarksFromJson(text),
       );
-      const merged = mergeBookmarks([...bookmarks, ...imported]);
+      const merged = mergeBookmarks(
+        [...bookmarks, ...imported],
+        settings.dedupeStrategy,
+      );
       setBookmarks(merged);
-      setStatus(`导入 ${imported.length} 条书签，合并后共 ${merged.length} 条`);
+      setStatus(
+        `导入 ${imported.length} 条书签，按 ${settings.dedupeStrategy} 策略去重后共 ${merged.length} 条`,
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "导入失败");
     }
@@ -648,6 +680,16 @@ export default function BookmarkOrganizerDemo() {
     setStatus("已合并选中项标签");
   };
 
+  /**
+   * 按当前策略执行全量去重。
+   * @param 无。
+   * @returns 无返回值。
+   */
+  const handleDedupe = () => {
+    setBookmarks((prev) => mergeBookmarks(prev, settings.dedupeStrategy));
+    setStatus(`已按 ${settings.dedupeStrategy} 策略完成去重`);
+  };
+
   return (
     <div className="mx-auto max-w-6xl space-y-8 p-6">
       <header className="space-y-3">
@@ -759,6 +801,9 @@ export default function BookmarkOrganizerDemo() {
               <span>筛选结果：{filteredBookmarks.length}</span>
               <span>失效链接：{invalidBookmarks.length}</span>
               <span>并发设置：{settings.concurrency}</span>
+              <span>
+                去重策略：{DEDUPE_STRATEGY_LABELS[settings.dedupeStrategy]}
+              </span>
             </div>
           </div>
           <div className="space-y-3 rounded-lg border p-4">
@@ -881,11 +926,7 @@ export default function BookmarkOrganizerDemo() {
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">书签列表</h2>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => setBookmarks(mergeBookmarks(bookmarks))}
-          >
+          <Button type="button" variant="ghost" onClick={handleDedupe}>
             去重合并
           </Button>
         </div>
@@ -1255,6 +1296,28 @@ export default function BookmarkOrganizerDemo() {
               />
               <p className="text-xs text-muted-foreground">
                 默认 8，最大 {MAX_CONCURRENCY}
+              </p>
+            </div>
+            <div className="space-y-2 border-t pt-4">
+              <Label htmlFor="dedupeStrategy">去重策略</Label>
+              <select
+                id="dedupeStrategy"
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={settings.dedupeStrategy}
+                onChange={(event) => {
+                  setSettings((prev) => ({
+                    ...prev,
+                    dedupeStrategy: resolveDedupeStrategy(event.target.value),
+                  }));
+                }}
+              >
+                <option value="balanced">balanced（平衡，默认）</option>
+                <option value="strict">strict（严格保留）</option>
+                <option value="aggressive">aggressive（激进去重）</option>
+              </select>
+              <p className="text-xs text-muted-foreground">
+                balanced：保留业务查询参数，移除追踪参数（如 utm_* / gclid /
+                fbclid）。
               </p>
             </div>
             <div className="flex justify-end gap-2">

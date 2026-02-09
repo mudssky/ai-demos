@@ -5,6 +5,7 @@ import {
   buildCsvReport,
   buildHtmlExport,
   cloneBookmarks,
+  isDedupeStrategy,
   matchesQuery,
   mergeBookmarks,
   normalizeUrl,
@@ -14,10 +15,85 @@ import {
 import type { BookmarkEntry } from "@/lib/bookmark-storage";
 
 describe("demo utils: bookmark-organizer", () => {
-  it("normalizes URLs", () => {
-    expect(normalizeUrl("https://example.com/path/")).toBe(
-      "https://example.com/path",
-    );
+  it("normalizes URL in balanced mode by default", () => {
+    expect(
+      normalizeUrl(
+        "https://example.com:443/path/?utm_source=test&id=2&gclid=abc&id=1#top",
+      ),
+    ).toBe("https://example.com/path?id=1&id=2");
+  });
+
+  it("normalizes URL in strict mode", () => {
+    expect(
+      normalizeUrl("https://example.com/path/?b=2&a=1#hash", "strict"),
+    ).toBe("https://example.com/path/?b=2&a=1");
+  });
+
+  it("normalizes URL in aggressive mode", () => {
+    expect(
+      normalizeUrl(
+        "https://example.com:8443/path/?id=2&utm_source=test#top",
+        "aggressive",
+      ),
+    ).toBe("https://example.com/path");
+  });
+
+  it("validates dedupe strategy values", () => {
+    expect(isDedupeStrategy("balanced")).toBe(true);
+    expect(isDedupeStrategy("strict")).toBe(true);
+    expect(isDedupeStrategy("aggressive")).toBe(true);
+    expect(isDedupeStrategy("custom")).toBe(false);
+    expect(isDedupeStrategy(undefined)).toBe(false);
+  });
+
+  it("keeps business query differences in balanced mode", () => {
+    const input: BookmarkEntry[] = [
+      { id: "1", url: "https://a.com/path?id=1", title: "A1" },
+      { id: "2", url: "https://a.com/path?id=2", title: "A2" },
+    ];
+    const merged = mergeBookmarks(input, "balanced");
+    expect(merged.length).toBe(2);
+  });
+
+  it("merges tracking-only differences in balanced mode", () => {
+    const input: BookmarkEntry[] = [
+      {
+        id: "1",
+        url: "https://a.com/path?utm_source=google&id=1",
+        title: "A",
+        tags: ["x"],
+      },
+      {
+        id: "2",
+        url: "https://a.com/path?utm_source=bing&id=1",
+        title: "",
+        tags: ["y"],
+      },
+    ];
+    const merged = mergeBookmarks(input, "balanced");
+    expect(merged.length).toBe(1);
+    expect(merged[0].url).toBe("https://a.com/path?id=1");
+    expect(merged[0].title).toBe("A");
+    expect(merged[0].tags).toEqual(expect.arrayContaining(["x", "y"]));
+  });
+
+  it("keeps query order differences equivalent in balanced mode", () => {
+    const input: BookmarkEntry[] = [
+      { id: "1", url: "https://a.com/path?a=1&b=2", title: "A" },
+      { id: "2", url: "https://a.com/path?b=2&a=1", title: "B" },
+    ];
+    const merged = mergeBookmarks(input, "balanced");
+    expect(merged.length).toBe(1);
+    expect(merged[0].url).toBe("https://a.com/path?a=1&b=2");
+  });
+
+  it("keeps tracking differences in strict mode", () => {
+    const input: BookmarkEntry[] = [
+      { id: "1", url: "https://a.com/path?utm_source=google", title: "A" },
+      { id: "2", url: "https://a.com/path?utm_source=bing", title: "B" },
+    ];
+    const merged = mergeBookmarks(input, "strict");
+    expect(merged.length).toBe(2);
   });
 
   it("merges duplicate bookmarks", () => {

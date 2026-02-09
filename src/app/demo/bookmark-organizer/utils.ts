@@ -1,26 +1,136 @@
 import type { BookmarkEntry } from "@/lib/bookmark-storage";
 
-export function normalizeUrl(value: string): string {
+export type DedupeStrategy = "strict" | "balanced" | "aggressive";
+
+const TRACKING_PARAM_NAMES = new Set([
+  "fbclid",
+  "gclid",
+  "msclkid",
+  "igshid",
+  "mc_cid",
+  "mc_eid",
+]);
+
+/**
+ * 判断给定值是否为合法的去重策略。
+ * @param value 待校验的策略字符串。
+ * @returns 当值属于 strict/balanced/aggressive 时返回 true。
+ */
+export function isDedupeStrategy(
+  value: string | null | undefined,
+): value is DedupeStrategy {
+  return value === "strict" || value === "balanced" || value === "aggressive";
+}
+
+/**
+ * 判断查询参数是否属于追踪参数。
+ * @param key 查询参数键名。
+ * @returns 若为追踪参数返回 true，否则返回 false。
+ */
+function isTrackingParam(key: string): boolean {
+  const lowerKey = key.toLowerCase();
+  return lowerKey.startsWith("utm_") || TRACKING_PARAM_NAMES.has(lowerKey);
+}
+
+/**
+ * 归一化 URL 端口，默认端口会被移除以降低无意义差异。
+ * @param url URL 对象。
+ * @returns 归一化后的端口字符串，空字符串表示不显式输出端口。
+ */
+function normalizePort(url: URL): string {
+  if (
+    (url.protocol === "https:" && url.port === "443") ||
+    (url.protocol === "http:" && url.port === "80")
+  ) {
+    return "";
+  }
+  return url.port;
+}
+
+/**
+ * 依据策略归一化路径。
+ * @param pathname 原始路径。
+ * @param strategy 去重策略。
+ * @returns 归一化后的路径。
+ */
+function normalizePathname(pathname: string, strategy: DedupeStrategy): string {
+  if (!pathname) return "/";
+  if (strategy === "strict") return pathname;
+  return pathname.endsWith("/") && pathname !== "/"
+    ? pathname.slice(0, -1)
+    : pathname;
+}
+
+/**
+ * 按 balanced 策略归一化查询参数。
+ * @param url URL 对象。
+ * @returns 归一化后的查询字符串（包含前导 ?，若为空则返回空字符串）。
+ */
+function buildBalancedSearch(url: URL): string {
+  const entries = [...url.searchParams.entries()]
+    .filter(([key]) => !isTrackingParam(key))
+    .sort(([aKey, aValue], [bKey, bValue]) => {
+      if (aKey === bKey) return aValue.localeCompare(bValue);
+      return aKey.localeCompare(bKey);
+    });
+
+  if (entries.length === 0) return "";
+
+  const params = new URLSearchParams();
+  for (const [key, value] of entries) {
+    params.append(key, value);
+  }
+
+  const query = params.toString();
+  return query ? `?${query}` : "";
+}
+
+/**
+ * 按指定策略将 URL 归一化为可用于去重的键。
+ * @param value 原始 URL 字符串。
+ * @param strategy 去重策略，默认 balanced。
+ * @returns 归一化后的 URL。解析失败时返回去除两端空白后的原值。
+ */
+export function normalizeUrl(
+  value: string,
+  strategy: DedupeStrategy = "balanced",
+): string {
   try {
     const url = new URL(value);
-    const normalized = `${url.protocol}//${url.hostname}${url.pathname}`;
-    return normalized.endsWith("/") && url.pathname !== "/"
-      ? normalized.slice(0, -1)
-      : normalized;
+    const pathname = normalizePathname(url.pathname, strategy);
+    const port = strategy === "aggressive" ? "" : normalizePort(url);
+    const search =
+      strategy === "strict"
+        ? url.search
+        : strategy === "balanced"
+          ? buildBalancedSearch(url)
+          : "";
+
+    return `${url.protocol}//${url.hostname}${port ? `:${port}` : ""}${pathname}${search}`;
   } catch {
     return value.trim();
   }
 }
 
-export function mergeBookmarks(bookmarks: BookmarkEntry[]): BookmarkEntry[] {
+/**
+ * 按去重策略合并书签列表。
+ * @param bookmarks 原始书签列表。
+ * @param strategy 去重策略，默认 balanced。
+ * @returns 合并后的书签列表。
+ */
+export function mergeBookmarks(
+  bookmarks: BookmarkEntry[],
+  strategy: DedupeStrategy = "balanced",
+): BookmarkEntry[] {
   const map = new Map<string, BookmarkEntry>();
   for (const item of bookmarks) {
-    const key = normalizeUrl(item.url);
+    const key = normalizeUrl(item.url, strategy);
     const existing = map.get(key);
     if (!existing) {
       map.set(key, { ...item, url: key });
       continue;
     }
+
     const mergedTags = new Set([
       ...(existing.tags ?? []),
       ...(item.tags ?? []),
@@ -29,12 +139,17 @@ export function mergeBookmarks(bookmarks: BookmarkEntry[]): BookmarkEntry[] {
       ...existing,
       title: existing.title || item.title,
       folderPath: existing.folderPath || item.folderPath,
-      tags: mergedTags.size ? Array.from(mergedTags) : existing.tags,
+      tags: mergedTags.size > 0 ? Array.from(mergedTags) : existing.tags,
     });
   }
   return Array.from(map.values());
 }
 
+/**
+ * 从 Chrome 书签 HTML 中解析书签条目。
+ * @param html HTML 文本内容。
+ * @returns 解析后的书签列表。
+ */
 export function parseBookmarksFromHtml(html: string): BookmarkEntry[] {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
@@ -78,6 +193,11 @@ export function parseBookmarksFromHtml(html: string): BookmarkEntry[] {
   return results;
 }
 
+/**
+ * 从 JSON 中解析书签条目。
+ * @param json JSON 文本。
+ * @returns 解析后的书签列表。
+ */
 export function parseBookmarksFromJson(json: string): BookmarkEntry[] {
   const raw = JSON.parse(json);
   const list: Array<{ url: string; title?: string; folderPath?: string }> =
@@ -92,6 +212,11 @@ export function parseBookmarksFromJson(json: string): BookmarkEntry[] {
     }));
 }
 
+/**
+ * 构建可供 Chrome 导入的书签 HTML。
+ * @param bookmarks 书签列表。
+ * @returns 导出的 HTML 字符串。
+ */
 export function buildHtmlExport(bookmarks: BookmarkEntry[]) {
   const tree = new Map<string, BookmarkEntry[]>();
   for (const item of bookmarks) {
@@ -132,6 +257,11 @@ export function buildHtmlExport(bookmarks: BookmarkEntry[]) {
   return `<!DOCTYPE NETSCAPE-Bookmark-file-1>\n<DL><p>${body}</p></DL>`;
 }
 
+/**
+ * 构建书签检测报告 CSV。
+ * @param bookmarks 书签列表。
+ * @returns CSV 文本。
+ */
 export function buildCsvReport(bookmarks: BookmarkEntry[]) {
   const header = ["url", "title", "status", "responseTimeMs"].join(",");
   const lines = bookmarks.map((item) =>
@@ -147,6 +277,11 @@ export function buildCsvReport(bookmarks: BookmarkEntry[]) {
   return [header, ...lines].join("\n");
 }
 
+/**
+ * 深拷贝书签数组中与编辑相关的字段，避免原地修改影响撤销栈。
+ * @param list 原始书签列表。
+ * @returns 可安全编辑的新列表。
+ */
 export function cloneBookmarks(list: BookmarkEntry[]): BookmarkEntry[] {
   return list.map((item) => ({
     ...item,
@@ -157,6 +292,12 @@ export function cloneBookmarks(list: BookmarkEntry[]): BookmarkEntry[] {
   }));
 }
 
+/**
+ * 判断书签是否匹配搜索词。
+ * @param item 书签条目。
+ * @param query 用户输入的搜索词。
+ * @returns 匹配返回 true，否则返回 false。
+ */
 export function matchesQuery(item: BookmarkEntry, query: string) {
   const q = query.trim().toLowerCase();
   if (!q) return true;
